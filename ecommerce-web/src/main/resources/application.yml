@@ -1,0 +1,38 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /ecommerce
+
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/shopeedb
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+jwt:
+  signerKey: "vpMMz/v4dXZH1coPnFlS4PpshX5rQRmrPcC0cTp3V85f30H1M+ED+YuzzLt414xy"
+  valid-duration: 3600 # in second
+  refreshable-duration: 36000 # in seconds
+
+
+aws:
+  s3:
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
+
+google:
+  oauth:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-url: ${GOOGLE_REDIRECT_URL}
+    grant-type: ${GOOGLE_GRANT_TYPE}
