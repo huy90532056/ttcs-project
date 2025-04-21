@@ -19,8 +19,8 @@ public class CartItem extends AbstractEntity{
     @NotNull(message = "Quantity is mandatory")
     private Integer quantity;
     @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "productId")
-    private Product product;
+    @JoinColumn(name = "variant_id", referencedColumnName = "variantId")
+    private ProductVariant productVariant;
 
     @ManyToOne
     @JoinColumn(name = "cart_id", referencedColumnName = "cartId")

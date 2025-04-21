@@ -3,6 +3,7 @@ package com.shopee.ecommerce_web.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -33,4 +34,8 @@ public class ProductVariant extends AbstractEntity{
 
     @Column(name = "stock_quantity")
     private Integer stockQuantity;
+    @OneToMany(mappedBy = "productVariant")
+    private List<CartItem> cartItems;
+    @OneToMany(mappedBy = "productVariant")
+    private List<OrderItem> orderItems;
 }

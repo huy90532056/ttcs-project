@@ -10,16 +10,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class OrderItem extends AbstractEntity{
+public class OrderItem extends AbstractEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderItemId;
 
-    @NotNull(message = "Product is mandatory")
+    @NotNull(message = "Product Variant is mandatory")
     @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "productId")
-    private Product product;
+    @JoinColumn(name = "variant_id", referencedColumnName = "variantId")  // Liên kết với ProductVariant
+    private ProductVariant productVariant;  // Thay "product" bằng "productVariant"
 
     @NotNull(message = "Quantity is mandatory")
     private Integer quantity;
@@ -30,5 +30,4 @@ public class OrderItem extends AbstractEntity{
     @ManyToOne
     @JoinColumn(name = "order_id", referencedColumnName = "orderId")
     private Order order;
-
 }

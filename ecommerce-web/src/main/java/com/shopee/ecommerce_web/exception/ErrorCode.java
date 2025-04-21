@@ -27,7 +27,8 @@ public enum ErrorCode {
     ORDER_ITEM_NOT_FOUND(1018, "orderItem not found!", HttpStatus.NOT_FOUND),
     PAYMENT_NOT_FOUND(1019, "payment not found!", HttpStatus.NOT_FOUND),
     SHIPPING_TRACKER_NOT_FOUND(1020, "shipping tracker not found", HttpStatus.NOT_FOUND),
-    ADDRESS_NOT_FOUND(1021, "address not found!", HttpStatus.NOT_FOUND)
+    ADDRESS_NOT_FOUND(1021, "address not found!", HttpStatus.NOT_FOUND),
+    PASSWORD_EXISTED(1022, "password existed!", HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

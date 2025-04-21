@@ -1,4 +1,4 @@
-package com.shopee.ecommerce_web.repository;
+package com.shopee.ecommerce_web.repository.httpclient;
 
 import com.shopee.ecommerce_web.dto.request.ExchangeTokenRequest;
 import com.shopee.ecommerce_web.dto.response.ExchangeTokenResponse;

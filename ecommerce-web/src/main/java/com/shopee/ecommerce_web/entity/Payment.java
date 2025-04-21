@@ -30,5 +30,4 @@ public class Payment extends AbstractEntity{
     @OneToOne
     @JoinColumn(name = "order_id", referencedColumnName = "orderId")
     private Order order;
-
 }

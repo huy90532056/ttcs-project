@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,7 +17,7 @@ public class CartItemResponse {
 
     private Integer quantity;  // Số lượng sản phẩm trong giỏ hàng
 
-    private Long productId;  // ID của sản phẩm
+    private UUID variantId;  // ID của ProductVariant (thay vì Product)
 
     private Long cartId;  // ID của giỏ hàng
 }

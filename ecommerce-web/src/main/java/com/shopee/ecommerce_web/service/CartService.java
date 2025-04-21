@@ -3,21 +3,18 @@ package com.shopee.ecommerce_web.service;
 import com.shopee.ecommerce_web.dto.request.CartCreationRequest;
 import com.shopee.ecommerce_web.dto.response.CartItemResponse;
 import com.shopee.ecommerce_web.dto.response.CartResponse;
-import com.shopee.ecommerce_web.entity.Cart;
-import com.shopee.ecommerce_web.entity.CartItem;
-import com.shopee.ecommerce_web.entity.Product;
-import com.shopee.ecommerce_web.entity.User;
+import com.shopee.ecommerce_web.dto.response.CartSummaryResponse;
+import com.shopee.ecommerce_web.entity.*;
 import com.shopee.ecommerce_web.exception.AppException;
 import com.shopee.ecommerce_web.exception.ErrorCode;
-import com.shopee.ecommerce_web.repository.CartItemRepository;
-import com.shopee.ecommerce_web.repository.CartRepository;
-import com.shopee.ecommerce_web.repository.ProductRepository;
-import com.shopee.ecommerce_web.repository.UserRepository;
+import com.shopee.ecommerce_web.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,19 +23,17 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
-    private final ProductRepository productRepository;
-    private final UserRepository userRepository; // Thêm UserRepository để truy vấn User từ userId
+    private final ProductVariantRepository productVariantRepository;
+    private final UserRepository userRepository;
 
     // Tạo mới giỏ hàng
     public CartResponse createCart(CartCreationRequest request) {
-        // Tìm User từ userId
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Cart cart = new Cart();
         cart.setUser(user);
 
-        // Lưu giỏ hàng vào cơ sở dữ liệu
         cart = cartRepository.save(cart);
 
         return mapToCartResponse(cart);
@@ -61,23 +56,21 @@ public class CartService {
                 .collect(Collectors.toList());
     }
 
-    // Cập nhật giỏ hàng (ví dụ: thêm sản phẩm vào giỏ hàng)
-    public CartResponse addItemToCart(Long cartId, Long productId, Integer quantity) {
+    // Thêm sản phẩm vào giỏ hàng
+    public CartResponse addItemToCart(Long cartId, UUID productVariantId, Integer quantity) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        ProductVariant productVariant = productVariantRepository.findById(productVariantId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
         CartItem cartItem = new CartItem();
         cartItem.setCart(cart);
-        cartItem.setProduct(product);
+        cartItem.setProductVariant(productVariant);
         cartItem.setQuantity(quantity);
 
-        // Lưu sản phẩm vào giỏ hàng
         cartItem = cartItemRepository.save(cartItem);
 
-        // Cập nhật lại danh sách các sản phẩm trong giỏ hàng
         cart.getCartItems().add(cartItem);
         cart = cartRepository.save(cart);
 
@@ -92,36 +85,95 @@ public class CartService {
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
 
-        cart.getCartItems().remove(cartItem); // Xóa sản phẩm khỏi giỏ hàng
-        cartItemRepository.delete(cartItem); // Xóa sản phẩm khỏi cơ sở dữ liệu
+        cart.getCartItems().remove(cartItem);
+        cartItemRepository.delete(cartItem);
 
-        // Lưu lại giỏ hàng sau khi xóa sản phẩm
         cart = cartRepository.save(cart);
 
         return mapToCartResponse(cart);
     }
 
+    // Cập nhật số lượng sản phẩm trong giỏ hàng
+    public CartResponse updateItemQuantity(Long cartId, Long cartItemId, Integer quantity) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
+
+        cartItem.setQuantity(quantity);
+        cartItem = cartItemRepository.save(cartItem);
+
+        return mapToCartResponse(cart);
+    }
+
     // Xóa giỏ hàng
+    @Transactional
     public void deleteCart(Long cartId) {
-        cartRepository.deleteById(cartId);
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+
+        // Xóa tất cả các CartItem liên quan
+        cartItemRepository.deleteAll(cart.getCartItems());
+
+        // Xóa giỏ hàng
+        cartRepository.delete(cart);
+    }
+
+
+    // Làm trống giỏ hàng
+    public void clearCart(Long cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+
+        cartItemRepository.deleteAll(cart.getCartItems());
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
+    }
+
+    // Thanh toán giỏ hàng
+    public boolean checkout(Long cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+
+        // Here you would implement logic like payment processing, order creation, etc.
+        // For now, assume checkout is always successful:
+        return true;
+    }
+
+    // Lấy thông tin tổng quan về giỏ hàng
+    public CartSummaryResponse getCartSummary(Long cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+
+        // Calculate the total price, total quantity, etc. for the cart
+        double totalPrice = 0.0;
+        int totalQuantity = 0;
+
+        for (CartItem item : cart.getCartItems()) {
+            double price = item.getProductVariant().getPrice() * item.getQuantity();
+            totalPrice += price;
+            totalQuantity += item.getQuantity();
+        }
+
+        return new CartSummaryResponse(totalQuantity, totalPrice);
     }
 
     // Phương thức giúp chuyển đổi từ Cart sang CartResponse
     private CartResponse mapToCartResponse(Cart cart) {
         if (cart.getCartItems() == null) {
-            cart.setCartItems(new ArrayList<>()); // Khởi tạo nếu là null
+            cart.setCartItems(new ArrayList<>());
         }
         CartResponse cartResponse = new CartResponse();
         cartResponse.setCartId(cart.getCartId());
         cartResponse.setUserId(cart.getUser().getId());
 
-        // Chuyển đổi các CartItem thành CartItemResponse
         List<CartItemResponse> cartItemResponses = cart.getCartItems().stream()
                 .map(cartItem -> new CartItemResponse(
-                        cartItem.getCartItemId(),         // cartItemId
-                        cartItem.getQuantity(),           // quantity
-                        cartItem.getProduct().getProductId(), // productId
-                        cartItem.getCart().getCartId()    // cartId
+                        cartItem.getCartItemId(),
+                        cartItem.getQuantity(),
+                        cartItem.getProductVariant().getVariantId(),
+                        cartItem.getCart().getCartId()
                 ))
                 .collect(Collectors.toList());
 
@@ -129,5 +181,4 @@ public class CartService {
 
         return cartResponse;
     }
-
 }

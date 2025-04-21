@@ -1,6 +1,7 @@
 package com.shopee.ecommerce_web.controller;
 
 import com.shopee.ecommerce_web.dto.request.ApiResponse;
+import com.shopee.ecommerce_web.dto.request.PasswordCreationRequest;
 import com.shopee.ecommerce_web.dto.request.UserCreationRequest;
 import com.shopee.ecommerce_web.dto.request.UserUpdateRequest;
 import com.shopee.ecommerce_web.dto.response.UserResponse;
@@ -27,6 +28,14 @@ public class UserController {
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request){
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))
+                .build();
+    }
+
+    @PostMapping("/create-password")
+    ApiResponse<Void> createPassword(@RequestBody @Valid PasswordCreationRequest request) {
+        userService.createPassword(request);
+        return ApiResponse.<Void>builder()
+                .message("Password has been created, you could use it to log-in")
                 .build();
     }
 
