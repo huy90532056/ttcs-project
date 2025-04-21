@@ -1,5 +1,6 @@
 package com.shopee.ecommerce_web.controller;
 
+import com.shopee.ecommerce_web.dto.request.ApiResponse;
 import com.shopee.ecommerce_web.dto.request.ProductInventoryCreationRequest;
 import com.shopee.ecommerce_web.dto.request.ProductInventoryUpdateRequest;
 import com.shopee.ecommerce_web.dto.response.ProductInventoryResponse;
@@ -21,34 +22,47 @@ public class ProductInventoryController {
 
     // Create a new ProductInventory
     @PostMapping
-    public ProductInventoryResponse createProductInventory(@RequestBody ProductInventoryCreationRequest request) {
+    public ApiResponse<ProductInventoryResponse> createProductInventory(@RequestBody ProductInventoryCreationRequest request) {
         ProductInventoryResponse response = productInventoryService.createProductInventory(request);
-        return response;
+        return ApiResponse.<ProductInventoryResponse>builder()
+                .result(response)
+                .build();
     }
 
     // Get all ProductInventories
     @GetMapping
-    public List<ProductInventoryResponse> getAllProductInventories() {
-        return productInventoryService.getAllProductInventories();
+    public ApiResponse<List<ProductInventoryResponse>> getAllProductInventories() {
+        List<ProductInventoryResponse> responses = productInventoryService.getAllProductInventories();
+        return ApiResponse.<List<ProductInventoryResponse>>builder()
+                .result(responses)
+                .build();
     }
 
     // Get a ProductInventory by ID
     @GetMapping("/{productInventoryId}")
-    public ProductInventoryResponse getProductInventory(@PathVariable Long productInventoryId) {
-        return productInventoryService.getProductInventoryById(productInventoryId);
+    public ApiResponse<ProductInventoryResponse> getProductInventory(@PathVariable Long productInventoryId) {
+        ProductInventoryResponse response = productInventoryService.getProductInventoryById(productInventoryId);
+        return ApiResponse.<ProductInventoryResponse>builder()
+                .result(response)
+                .build();
     }
 
     // Update ProductInventory
     @PutMapping("/{productInventoryId}")
-    public ProductInventoryResponse updateProductInventory(@PathVariable Long productInventoryId,
-                                                           @RequestBody ProductInventoryUpdateRequest request) {
-        return productInventoryService.updateProductInventory(productInventoryId, request);
+    public ApiResponse<ProductInventoryResponse> updateProductInventory(@PathVariable Long productInventoryId,
+                                                                        @RequestBody ProductInventoryUpdateRequest request) {
+        ProductInventoryResponse response = productInventoryService.updateProductInventory(productInventoryId, request);
+        return ApiResponse.<ProductInventoryResponse>builder()
+                .result(response)
+                .build();
     }
 
     // Delete ProductInventory
     @DeleteMapping("/{productInventoryId}")
-    public String deleteProductInventory(@PathVariable Long productInventoryId) {
+    public ApiResponse<String> deleteProductInventory(@PathVariable Long productInventoryId) {
         productInventoryService.deleteProductInventory(productInventoryId);
-        return "ProductInventory has been deleted";
+        return ApiResponse.<String>builder()
+                .result("ProductInventory has been deleted")
+                .build();
     }
 }

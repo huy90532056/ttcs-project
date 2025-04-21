@@ -1,12 +1,11 @@
 package com.shopee.ecommerce_web.controller;
 
+import com.shopee.ecommerce_web.dto.request.ApiResponse;
 import com.shopee.ecommerce_web.dto.request.CategoryDto;
 import com.shopee.ecommerce_web.entity.Category;
 import com.shopee.ecommerce_web.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,28 +18,42 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody @Valid CategoryDto categoryDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(categoryDto));
+    public ApiResponse<Category> createCategory(@RequestBody @Valid CategoryDto categoryDto) {
+        Category category = categoryService.createCategory(categoryDto);
+        return ApiResponse.<Category>builder()
+                .result(category)
+                .build();
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public ApiResponse<List<Category>> getAllCategories() {
+        List<Category> categories = categoryService.getAllCategories();
+        return ApiResponse.<List<Category>>builder()
+                .result(categories)
+                .build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable String id) {
-        return ResponseEntity.ok(categoryService.getCategoryById(id));
+    public ApiResponse<Category> getCategoryById(@PathVariable String id) {
+        Category category = categoryService.getCategoryById(id);
+        return ApiResponse.<Category>builder()
+                .result(category)
+                .build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable String id, @RequestBody @Valid CategoryDto categoryDto) {
-        return ResponseEntity.ok(categoryService.updateCategory(id, categoryDto));
+    public ApiResponse<Category> updateCategory(@PathVariable String id, @RequestBody @Valid CategoryDto categoryDto) {
+        Category category = categoryService.updateCategory(id, categoryDto);
+        return ApiResponse.<Category>builder()
+                .result(category)
+                .build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable String id) {
+    public ApiResponse<String> deleteCategory(@PathVariable String id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
+        return ApiResponse.<String>builder()
+                .result("Category has been deleted")
+                .build();
     }
 }

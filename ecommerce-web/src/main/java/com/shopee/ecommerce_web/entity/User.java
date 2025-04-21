@@ -29,8 +29,6 @@ public class User extends AbstractEntity{
     LocalDate dob;
     @ManyToMany
     Set<Role> roles;
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "user")
-    private Set<Address> addresses = new HashSet<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Review> reviews;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,11 +1,10 @@
 package com.shopee.ecommerce_web.controller;
 
+import com.shopee.ecommerce_web.dto.request.ApiResponse;
 import com.shopee.ecommerce_web.dto.request.CartCreationRequest;
 import com.shopee.ecommerce_web.dto.response.CartResponse;
 import com.shopee.ecommerce_web.service.CartService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,46 +18,58 @@ public class CartController {
 
     // Tạo giỏ hàng mới
     @PostMapping
-    public ResponseEntity<CartResponse> createCart(@RequestBody CartCreationRequest request) {
+    public ApiResponse<CartResponse> createCart(@RequestBody CartCreationRequest request) {
         CartResponse cartResponse = cartService.createCart(request);
-        return new ResponseEntity<>(cartResponse, HttpStatus.CREATED);
+        return ApiResponse.<CartResponse>builder()
+                .result(cartResponse)
+                .build();
     }
 
     // Lấy thông tin giỏ hàng theo cartId
     @GetMapping("/{cartId}")
-    public ResponseEntity<CartResponse> getCart(@PathVariable Long cartId) {
+    public ApiResponse<CartResponse> getCart(@PathVariable Long cartId) {
         CartResponse cartResponse = cartService.getCart(cartId);
-        return new ResponseEntity<>(cartResponse, HttpStatus.OK);
+        return ApiResponse.<CartResponse>builder()
+                .result(cartResponse)
+                .build();
     }
 
     // Lấy thông tin tất cả giỏ hàng
     @GetMapping
-    public ResponseEntity<List<CartResponse>> getAllCarts() {
+    public ApiResponse<List<CartResponse>> getAllCarts() {
         List<CartResponse> cartResponses = cartService.getAllCarts();
-        return new ResponseEntity<>(cartResponses, HttpStatus.OK);
+        return ApiResponse.<List<CartResponse>>builder()
+                .result(cartResponses)
+                .build();
     }
 
     // Thêm sản phẩm vào giỏ hàng
     @PostMapping("/{cartId}/items")
-    public ResponseEntity<CartResponse> addItemToCart(@PathVariable Long cartId,
-                                                      @RequestParam Long productId,
-                                                      @RequestParam Integer quantity) {
+    public ApiResponse<CartResponse> addItemToCart(@PathVariable Long cartId,
+                                                   @RequestParam Long productId,
+                                                   @RequestParam Integer quantity) {
         CartResponse cartResponse = cartService.addItemToCart(cartId, productId, quantity);
-        return new ResponseEntity<>(cartResponse, HttpStatus.OK);
+        return ApiResponse.<CartResponse>builder()
+                .result(cartResponse)
+                .build();
     }
 
     // Xóa sản phẩm khỏi giỏ hàng
     @DeleteMapping("/{cartId}/items/{cartItemId}")
-    public ResponseEntity<CartResponse> removeItemFromCart(@PathVariable Long cartId,
-                                                           @PathVariable Long cartItemId) {
+    public ApiResponse<CartResponse> removeItemFromCart(@PathVariable Long cartId,
+                                                        @PathVariable Long cartItemId) {
         CartResponse cartResponse = cartService.removeItemFromCart(cartId, cartItemId);
-        return new ResponseEntity<>(cartResponse, HttpStatus.OK);
+        return ApiResponse.<CartResponse>builder()
+                .result(cartResponse)
+                .build();
     }
 
     // Xóa giỏ hàng
     @DeleteMapping("/{cartId}")
-    public ResponseEntity<Void> deleteCart(@PathVariable Long cartId) {
+    public ApiResponse<String> deleteCart(@PathVariable Long cartId) {
         cartService.deleteCart(cartId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ApiResponse.<String>builder()
+                .result("Cart has been deleted")
+                .build();
     }
 }

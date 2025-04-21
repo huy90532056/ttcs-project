@@ -19,7 +19,6 @@ import java.util.List;
 public class TagController {
     TagService tagService;
 
-    // Create a new Tag
     @PostMapping
     public ApiResponse<TagResponse> createTag(@RequestBody TagCreationRequest request) {
         TagResponse tagResponse = tagService.createTag(request);
@@ -28,7 +27,6 @@ public class TagController {
                 .build();
     }
 
-    // Get all Tags
     @GetMapping
     public ApiResponse<List<TagResponse>> getTags() {
         List<TagResponse> tags = tagService.getTags();
@@ -37,7 +35,6 @@ public class TagController {
                 .build();
     }
 
-    // Get Tag by ID
     @GetMapping("/{tagId}")
     public ApiResponse<TagResponse> getTag(@PathVariable String tagId) {
         TagResponse tagResponse = tagService.getTag(tagId);
@@ -46,7 +43,6 @@ public class TagController {
                 .build();
     }
 
-    // Update a Tag
     @PutMapping("/{tagId}")
     public ApiResponse<TagResponse> updateTag(@PathVariable String tagId, @RequestBody TagUpdateRequest request) {
         TagResponse tagResponse = tagService.updateTag(tagId, request);
@@ -55,7 +51,6 @@ public class TagController {
                 .build();
     }
 
-    // Delete a Tag
     @DeleteMapping("/{tagId}")
     public ApiResponse<String> deleteTag(@PathVariable String tagId) {
         tagService.deleteTag(tagId);
