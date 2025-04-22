@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/inventories")
@@ -46,21 +47,19 @@ public class InventoryController {
                 .build();
     }
 
-    // Update an Inventory
-    @PutMapping("/{inventoryId}")
-    public ApiResponse<InventoryResponse> updateInventory(@PathVariable Long inventoryId, @RequestBody InventoryCreationRequest request) {
-        InventoryResponse inventoryResponse = inventoryService.updateInventory(inventoryId, request);
-        return ApiResponse.<InventoryResponse>builder()
-                .result(inventoryResponse)
-                .build();
-    }
-
     // Delete an Inventory
     @DeleteMapping("/{inventoryId}")
     public ApiResponse<String> deleteInventory(@PathVariable Long inventoryId) {
         inventoryService.deleteInventory(inventoryId);
         return ApiResponse.<String>builder()
                 .result("Inventory has been deleted")
+                .build();
+    }
+    @GetMapping("/user/{userId}")
+    public ApiResponse<List<InventoryResponse>> getInventoriesByUserId(@PathVariable String userId) {
+        List<InventoryResponse> responses = inventoryService.getInventoriesByUserId(userId);
+        return ApiResponse.<List<InventoryResponse>>builder()
+                .result(responses)
                 .build();
     }
 }

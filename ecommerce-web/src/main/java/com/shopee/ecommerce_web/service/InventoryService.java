@@ -3,10 +3,12 @@ package com.shopee.ecommerce_web.service;
 import com.shopee.ecommerce_web.dto.request.InventoryCreationRequest;
 import com.shopee.ecommerce_web.dto.response.InventoryResponse;
 import com.shopee.ecommerce_web.entity.Inventory;
+import com.shopee.ecommerce_web.entity.ProductInventory;
 import com.shopee.ecommerce_web.entity.User;
 import com.shopee.ecommerce_web.exception.AppException;
 import com.shopee.ecommerce_web.exception.ErrorCode;
 import com.shopee.ecommerce_web.repository.InventoryRepository;
+import com.shopee.ecommerce_web.repository.ProductInventoryRepository;
 import com.shopee.ecommerce_web.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class InventoryService {
 
     InventoryRepository inventoryRepository;
     UserRepository userRepository;  // Thêm UserRepository để tìm User từ ID
+    ProductInventoryRepository productInventoryRepository;  // Giả sử có repository cho ProductInventory
 
     // Create new Inventory
     public InventoryResponse createInventory(InventoryCreationRequest request) {
@@ -36,10 +40,14 @@ public class InventoryService {
         // Lưu Inventory vào database
         inventory = inventoryRepository.save(inventory);
 
+        // Lấy danh sách ProductInventory liên quan đến Inventory (giả sử Inventory có mối quan hệ với ProductInventory)
+        List<ProductInventory> productInventories = productInventoryRepository.findByInventory(inventory);
+
         // Chuyển đổi Inventory thành InventoryResponse
         InventoryResponse response = new InventoryResponse();
         response.setInventoryId(inventory.getInventoryId());
         response.setUserId(inventory.getUser().getId()); // Giả sử User có phương thức getUserId()
+        response.setProductInventories(productInventories); // Thêm productInventories vào response
 
         return response;
     }
@@ -48,9 +56,11 @@ public class InventoryService {
     public List<InventoryResponse> getInventories() {
         return inventoryRepository.findAll().stream()
                 .map(inventory -> {
+                    List<ProductInventory> productInventories = productInventoryRepository.findByInventory(inventory);
                     InventoryResponse response = new InventoryResponse();
                     response.setInventoryId(inventory.getInventoryId());
                     response.setUserId(inventory.getUser().getId()); // Assuming user has getUserId() method
+                    response.setProductInventories(productInventories); // Thêm productInventories vào response
                     return response;
                 })
                 .toList();
@@ -61,29 +71,12 @@ public class InventoryService {
         Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_EXISTED));
 
-        InventoryResponse response = new InventoryResponse();
-        response.setInventoryId(inventory.getInventoryId());
-        response.setUserId(inventory.getUser().getId()); // Assuming user has getUserId() method
-        return response;
-    }
-
-    // Update Inventory
-    public InventoryResponse updateInventory(Long inventoryId, InventoryCreationRequest request) {
-        Inventory inventory = inventoryRepository.findById(inventoryId)
-                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_EXISTED));
-
-        User user = userRepository.findById(request.getUserId())  // Giả sử ID của User được cung cấp trong request
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));  // Nếu không tìm thấy User, throw Exception
-
-        // Update fields of Inventory
-        inventory.setUser(user); // Assuming User is passed in the request
-
-        // Save the updated Inventory
-        inventory = inventoryRepository.save(inventory);
+        List<ProductInventory> productInventories = productInventoryRepository.findByInventory(inventory);
 
         InventoryResponse response = new InventoryResponse();
         response.setInventoryId(inventory.getInventoryId());
         response.setUserId(inventory.getUser().getId()); // Assuming user has getUserId() method
+        response.setProductInventories(productInventories); // Thêm productInventories vào response
         return response;
     }
 
@@ -95,4 +88,19 @@ public class InventoryService {
 
         inventoryRepository.deleteById(inventoryId);
     }
+
+    // Get Inventories by UserId
+    public List<InventoryResponse> getInventoriesByUserId(String userId) {
+        List<Inventory> inventories = inventoryRepository.findAllByUser_Id(userId);
+
+        return inventories.stream().map(inventory -> {
+            List<ProductInventory> productInventories = productInventoryRepository.findByInventory(inventory);
+            InventoryResponse response = new InventoryResponse();
+            response.setInventoryId(inventory.getInventoryId());
+            response.setUserId(inventory.getUser().getId());
+            response.setProductInventories(productInventories); // Thêm productInventories vào response
+            return response;
+        }).toList();
+    }
 }
+

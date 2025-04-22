@@ -1,5 +1,6 @@
 package com.shopee.ecommerce_web.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -21,6 +22,7 @@ public class ProductInventory extends AbstractEntity {
     private Product product;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "inventory_id", referencedColumnName = "inventoryId")
     private Inventory inventory;
 
