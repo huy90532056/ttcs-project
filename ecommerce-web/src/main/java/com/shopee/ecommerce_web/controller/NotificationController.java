@@ -63,4 +63,13 @@ public class NotificationController {
                 .result("Notification has been deleted")
                 .build();
     }
+    // Get notifications by user ID (String type for userId)
+    @GetMapping("/user/{userId}")
+    public ApiResponse<List<NotificationResponse>> getNotificationsByUser(@PathVariable String userId) {
+        List<NotificationResponse> notifications = notificationService.getNotificationsByUser(userId);
+        return ApiResponse.<List<NotificationResponse>>builder()
+                .result(notifications)
+                .build();
+    }
+
 }

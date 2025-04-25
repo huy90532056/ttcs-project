@@ -1,10 +1,10 @@
 package com.shopee.ecommerce_web.controller;
+
 import com.shopee.ecommerce_web.dto.request.ApiResponse;
 import com.shopee.ecommerce_web.dto.request.ProductCreationRequest;
 import com.shopee.ecommerce_web.dto.request.ProductUpdateRequest;
 import com.shopee.ecommerce_web.dto.response.PageResponse;
 import com.shopee.ecommerce_web.dto.response.ProductResponse;
-import com.shopee.ecommerce_web.entity.Product;
 import com.shopee.ecommerce_web.service.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -16,89 +16,115 @@ import java.util.List;
 @RestController
 @RequestMapping("/products")
 public class ProductController {
+
     @Autowired
     private ProductService productService;
 
+    // Tạo sản phẩm mới
     @PostMapping()
-    ApiResponse<Product> createProduct(@RequestBody @Valid ProductCreationRequest request) {
-
-        ApiResponse<Product> apiResponse = new ApiResponse<>();
-
-        apiResponse.setResult(productService.createProduct(request));
-
-        return apiResponse;
+    public ApiResponse<ProductResponse> createProduct(@RequestBody @Valid ProductCreationRequest request) {
+        ProductResponse productResponse = productService.createProduct(request);
+        return ApiResponse.<ProductResponse>builder()
+                .result(productResponse)
+                .build();
     }
 
+    // Lấy tất cả sản phẩm
     @GetMapping()
-    List<Product> getProducts() {
-        return productService.getProducts();
+    public ApiResponse<List<ProductResponse>> getProducts() {
+        List<ProductResponse> productResponses = productService.getProducts();
+        return ApiResponse.<List<ProductResponse>>builder()
+                .result(productResponses)
+                .build();
     }
 
+    // Lấy thông tin sản phẩm theo id
     @GetMapping("/{productId}")
-    ProductResponse getProduct(@PathVariable("productId") Long productId) {
-        return productService.getProduct(productId);
+    public ApiResponse<ProductResponse> getProduct(@PathVariable("productId") Long productId) {
+        ProductResponse productResponse = productService.getProduct(productId);
+        return ApiResponse.<ProductResponse>builder()
+                .result(productResponse)
+                .build();
     }
 
+    // Cập nhật sản phẩm
     @PutMapping("{productId}")
-    ProductResponse updateProduct(@PathVariable("productId") Long productId,
-                                  @RequestBody ProductUpdateRequest request) {
-        return productService.updateProduct(productId, request);
+    public ApiResponse<ProductResponse> updateProduct(@PathVariable("productId") Long productId,
+                                                      @RequestBody ProductUpdateRequest request) {
+        ProductResponse productResponse = productService.updateProduct(productId, request);
+        return ApiResponse.<ProductResponse>builder()
+                .result(productResponse)
+                .build();
     }
 
+    // Xóa sản phẩm
     @DeleteMapping("/{productId}")
-    String deleteProduct(@PathVariable("productId") Long productId) {
+    public ApiResponse<String> deleteProduct(@PathVariable("productId") Long productId) {
         productService.deleteProduct(productId);
-        return "User has been deleted";
+        return ApiResponse.<String>builder()
+                .result("Product has been deleted")
+                .build();
     }
 
+    // Thêm category vào sản phẩm
     @PutMapping("/{productId}/categories/{categoryId}")
-    public ApiResponse<Product> addCategoryToProduct(@PathVariable("productId") Long productId,
-                                                     @PathVariable("categoryId") String categoryId) {
-        ApiResponse<Product> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(productService.addCategoryToProduct(productId, categoryId));
-        return apiResponse;
+    public ApiResponse<ProductResponse> addCategoryToProduct(@PathVariable("productId") Long productId,
+                                                             @PathVariable("categoryId") String categoryId) {
+        ProductResponse productResponse = productService.addCategoryToProduct(productId, categoryId);
+        return ApiResponse.<ProductResponse>builder()
+                .result(productResponse)
+                .build();
     }
 
+    // Thêm tag vào sản phẩm
     @PutMapping("/{productId}/tags/{tagId}")
-    public ApiResponse<Product> addTagToProduct(@PathVariable("productId") Long productId,
-                                                @PathVariable("tagId") String tagId) {
-        ApiResponse<Product> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(productService.addTagToProduct(productId, tagId));
-        return apiResponse;
+    public ApiResponse<ProductResponse> addTagToProduct(@PathVariable("productId") Long productId,
+                                                        @PathVariable("tagId") String tagId) {
+        ProductResponse productResponse = productService.addTagToProduct(productId, tagId);
+        return ApiResponse.<ProductResponse>builder()
+                .result(productResponse)
+                .build();
     }
 
+    // Lấy danh sách sản phẩm với phân trang
     @GetMapping("/list")
     public ApiResponse<List<ProductResponse>> getAllProductsPaging(
             @RequestParam(defaultValue = "0", required = false) int pageNo,
             @Min(5) @RequestParam(defaultValue = "10", required = false) int pageSize
     ) {
-        ApiResponse<List<ProductResponse>> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(productService.getAllProductsPaging(pageNo, pageSize));
-        return apiResponse;
+        List<ProductResponse> productResponses = productService.getAllProductsPaging(pageNo, pageSize);
+        return ApiResponse.<List<ProductResponse>>builder()
+                .result(productResponses)
+                .build();
     }
 
+    // Lấy danh sách sản phẩm với phân trang và sắp xếp
     @GetMapping("/list/sort")
     public ApiResponse<List<ProductResponse>> getAllProductsPagingSort(
             @RequestParam(defaultValue = "0", required = false) int pageNo,
             @Min(5) @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(required = false) String sortBy
     ) {
-        ApiResponse<List<ProductResponse>> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(productService.getAllProductsPagingSort(pageNo, pageSize, sortBy));
-        return apiResponse;
+        List<ProductResponse> productResponses = productService.getAllProductsPagingSort(pageNo, pageSize, sortBy);
+        return ApiResponse.<List<ProductResponse>>builder()
+                .result(productResponses)
+                .build();
     }
 
+    // Lấy danh sách sản phẩm với phân trang, sắp xếp và nhiều category
     @GetMapping("/list/sort/multiple")
     public ApiResponse<PageResponse<?>> getAllProductsPagingSortByMultipleCategory(
             @RequestParam(defaultValue = "0", required = false) int pageNo,
             @Min(5) @RequestParam(defaultValue = "10", required = false) int pageSize,
             @RequestParam(required = false) String... sort
     ) {
-        ApiResponse<PageResponse<?>> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(productService.getAllProductsPagingSortByMultipleCategory(pageNo, pageSize, sort));
-        return apiResponse;
+        PageResponse<?> pageResponse = productService.getAllProductsPagingSortByMultipleCategory(pageNo, pageSize, sort);
+        return ApiResponse.<PageResponse<?>>builder()
+                .result(pageResponse)
+                .build();
     }
 
+    // Lấy danh sách sản phẩm với phân trang, sắp xếp, tìm kiếm và nhiều category
     @GetMapping("/list/sort/multiple/search")
     public ApiResponse<PageResponse<?>> getAllProductsPagingSortByMultipleCategorySearch(
             @RequestParam(defaultValue = "0", required = false) int pageNo,
@@ -106,10 +132,18 @@ public class ProductController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String sortBy
     ) {
-        ApiResponse<PageResponse<?>> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(productService.getAllProductsPagingSortByMultipleCategorySearch(pageNo, pageSize,
-                search, sortBy));
-        return apiResponse;
-
+        PageResponse<?> pageResponse = productService.getAllProductsPagingSortByMultipleCategorySearch(pageNo, pageSize, search, sortBy);
+        return ApiResponse.<PageResponse<?>>builder()
+                .result(pageResponse)
+                .build();
     }
+    // Lấy tất cả sản phẩm theo category
+    @GetMapping("/category/{categoryId}")
+    public ApiResponse<List<ProductResponse>> getProductsByCategory(@PathVariable("categoryId") String categoryId) {
+        List<ProductResponse> products = productService.getProductsByCategory(categoryId);
+        return ApiResponse.<List<ProductResponse>>builder()
+                .result(products)
+                .build();
+    }
+
 }

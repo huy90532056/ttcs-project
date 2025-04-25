@@ -24,7 +24,6 @@ jwt:
   valid-duration: 3600 # in second
   refreshable-duration: 36000 # in seconds
 
-
 aws:
   s3:
     access-key: ${AWS_ACCESS_KEY}

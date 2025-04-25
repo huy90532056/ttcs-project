@@ -27,7 +27,11 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh",
+<<<<<<< HEAD
             "/auth/outbound/authentication"
+=======
+            "/auth/outbound/authentication", "vn-pay-callback",
+>>>>>>> huy
     };
 
     @Autowired

@@ -4,6 +4,7 @@ import com.shopee.ecommerce_web.configuration.MQConfig;
 import com.shopee.ecommerce_web.dto.custom.CustomMessage;
 import com.shopee.ecommerce_web.dto.request.OrderCreationRequest;
 import com.shopee.ecommerce_web.dto.request.OrderUpdateRequest;
+import com.shopee.ecommerce_web.dto.response.OrderItemResponse;
 import com.shopee.ecommerce_web.dto.response.OrderResponse;
 import com.shopee.ecommerce_web.entity.Order;
 import com.shopee.ecommerce_web.entity.OrderStatus;
@@ -28,6 +29,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+
     @Autowired
     private RabbitTemplate template;
 
@@ -44,19 +46,21 @@ public class OrderService {
 
         order = orderRepository.save(order);
 
+        // Gửi message qua MQ
         CustomMessage message = new CustomMessage();
-
         message.setMessageId(UUID.randomUUID().toString());
         message.setMessageDate(new Date());
         message.setMessage(request.getUserId());
         template.convertAndSend(MQConfig.EXCHANGE,
                 MQConfig.ROUTING_KEY, message);
 
+        // Trả về OrderResponse
         return OrderResponse.builder()
                 .orderId(order.getOrderId())
-                .userId(order.getUser().getId())  // Lấy userId từ đối tượng User
+                .userId(order.getUser().getId())
                 .orderDate(order.getOrderDate())
-                .status(OrderStatus.valueOf(order.getStatus().name())) // Lấy tên của OrderStatus
+                .status(order.getStatus())
+                .items(order.getItems())  // Trả về List<OrderItem> trực tiếp
                 .build();
     }
 
@@ -67,7 +71,8 @@ public class OrderService {
                         .orderId(order.getOrderId())
                         .userId(order.getUser().getId()) // Lấy userId từ đối tượng User
                         .orderDate(order.getOrderDate())
-                        .status(OrderStatus.valueOf(order.getStatus().name())) // Chuyển trạng thái sang String
+                        .status(order.getStatus())
+                        .items(order.getItems()) // Trả về List<OrderItem> trực tiếp
                         .build())
                 .collect(Collectors.toList());
     }
@@ -81,7 +86,8 @@ public class OrderService {
                 .orderId(order.getOrderId())
                 .userId(order.getUser().getId())  // Lấy userId từ đối tượng User
                 .orderDate(order.getOrderDate())
-                .status(OrderStatus.valueOf(order.getStatus().name())) // Lấy tên của OrderStatus
+                .status(order.getStatus())
+                .items(order.getItems()) // Trả về List<OrderItem> trực tiếp
                 .build();
     }
 
@@ -97,7 +103,8 @@ public class OrderService {
                 .orderId(order.getOrderId())
                 .userId(order.getUser().getId())  // Lấy userId từ đối tượng User
                 .orderDate(order.getOrderDate())
-                .status(OrderStatus.valueOf(order.getStatus().name())) // Lấy tên của OrderStatus
+                .status(order.getStatus())
+                .items(order.getItems()) // Trả về List<OrderItem> trực tiếp
                 .build();
     }
 
@@ -107,5 +114,23 @@ public class OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         orderRepository.delete(order);
+    }
+
+    // Lấy đơn hàng theo ID của User
+    public List<OrderResponse> getOrdersByUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Order> orders = orderRepository.findByUser(user);
+
+        return orders.stream()
+                .map(order -> OrderResponse.builder()
+                        .orderId(order.getOrderId())
+                        .userId(order.getUser().getId())
+                        .orderDate(order.getOrderDate())
+                        .status(order.getStatus())
+                        .items(order.getItems()) // Trả về List<OrderItem> trực tiếp
+                        .build())
+                .collect(Collectors.toList());
     }
 }

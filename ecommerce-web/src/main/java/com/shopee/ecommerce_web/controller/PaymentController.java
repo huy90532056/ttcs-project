@@ -3,14 +3,18 @@ package com.shopee.ecommerce_web.controller;
 import com.shopee.ecommerce_web.dto.request.ApiResponse;
 import com.shopee.ecommerce_web.dto.request.PaymentCreationRequest;
 import com.shopee.ecommerce_web.dto.request.PaymentUpdateRequest;
+import com.shopee.ecommerce_web.dto.response.PaymentDTO;
 import com.shopee.ecommerce_web.dto.response.PaymentResponse;
 import com.shopee.ecommerce_web.service.PaymentService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/payments")
@@ -64,4 +68,29 @@ public class PaymentController {
                 .result("Payment has been deleted")
                 .build();
     }
+    @GetMapping("/vn-pay")
+    public ApiResponse<PaymentDTO.VNPayResponse> pay(HttpServletRequest request) {
+        PaymentDTO.VNPayResponse response = paymentService.createVnPayPayment(request);
+        return new ApiResponse<>(HttpStatus.OK.value(), "Success", response);
+    }
+
+    @GetMapping("/vn-pay-callback")
+    public ApiResponse<PaymentDTO.VNPayResponse> payCallbackHandler(HttpServletRequest request) {
+        String status = request.getParameter("vnp_ResponseCode");
+
+        // Khởi tạo đối tượng VNPayResponse thông qua Builder
+        PaymentDTO.VNPayResponse response = PaymentDTO.VNPayResponse.builder()
+                .code("00")
+                .message("Success")
+                .paymentUrl("http://yourdomain.com/payment/success")
+                .build();
+
+        if (status.equals("00")) {
+            return new ApiResponse<>(HttpStatus.OK.value(), "Success", response);
+        } else {
+            return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), "Failed", null);
+        }
+    }
+
+
 }

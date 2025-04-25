@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -67,5 +68,18 @@ public class NotificationService {
                 .orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
         notificationRepository.delete(notification);
+    }
+    public List<NotificationResponse> getNotificationsByUser(String userId) {
+        List<Notification> notifications = notificationRepository.findByUserId(userId);
+
+        return notifications.stream()
+                .map(notification -> {
+                    NotificationResponse response = new NotificationResponse();
+                    response.setNotificationId(notification.getNotificationId());
+                    response.setMessage(notification.getMessage());
+                    response.setUserId(userId);
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 }

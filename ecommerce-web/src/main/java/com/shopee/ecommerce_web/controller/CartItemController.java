@@ -25,7 +25,7 @@ public class CartItemController {
                 .build();
     }
 
-    // Get all CartItems
+    // Get all CartItems (optional: admin only)
     @GetMapping
     public ApiResponse<List<CartItemResponse>> getAllCartItems() {
         List<CartItemResponse> cartItems = cartItemService.getAllCartItems();
@@ -43,21 +43,48 @@ public class CartItemController {
                 .build();
     }
 
-    // Update CartItem
-    @PutMapping("/{cartItemId}")
-    public ApiResponse<CartItemResponse> updateCartItem(@PathVariable Long cartItemId, @RequestBody CartItemCreationRequest request) {
-        CartItemResponse cartItemResponse = cartItemService.updateCartItem(cartItemId, request);
-        return ApiResponse.<CartItemResponse>builder()
-                .result(cartItemResponse)
+    // Get all CartItems by Cart ID
+    @GetMapping("/by-cart/{cartId}")
+    public ApiResponse<List<CartItemResponse>> getCartItemsByCartId(@PathVariable Long cartId) {
+        List<CartItemResponse> cartItems = cartItemService.getCartItemsByCartId(cartId);
+        return ApiResponse.<List<CartItemResponse>>builder()
+                .result(cartItems)
                 .build();
     }
 
-    // Delete CartItem
+    // Increase quantity
+    @PatchMapping("/{cartItemId}/increment")
+    public ApiResponse<CartItemResponse> incrementQuantity(@PathVariable Long cartItemId) {
+        CartItemResponse updated = cartItemService.incrementQuantity(cartItemId);
+        return ApiResponse.<CartItemResponse>builder()
+                .result(updated)
+                .build();
+    }
+
+    // Decrease quantity
+    @PatchMapping("/{cartItemId}/decrement")
+    public ApiResponse<CartItemResponse> decrementQuantity(@PathVariable Long cartItemId) {
+        CartItemResponse updated = cartItemService.decrementQuantity(cartItemId);
+        return ApiResponse.<CartItemResponse>builder()
+                .result(updated)
+                .build();
+    }
+
+    // Delete CartItem by ID
     @DeleteMapping("/{cartItemId}")
     public ApiResponse<String> deleteCartItem(@PathVariable Long cartItemId) {
         cartItemService.deleteCartItem(cartItemId);
         return ApiResponse.<String>builder()
                 .result("CartItem has been deleted")
+                .build();
+    }
+
+    // Update CartItem (e.g., change variant, quantity)
+    @PutMapping("/{cartItemId}")
+    public ApiResponse<CartItemResponse> updateCartItem(@PathVariable Long cartItemId, @RequestBody CartItemCreationRequest request) {
+        CartItemResponse cartItemResponse = cartItemService.updateCartItem(cartItemId, request);
+        return ApiResponse.<CartItemResponse>builder()
+                .result(cartItemResponse)
                 .build();
     }
 }

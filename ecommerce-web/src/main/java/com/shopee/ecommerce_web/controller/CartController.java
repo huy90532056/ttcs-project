@@ -3,11 +3,13 @@ package com.shopee.ecommerce_web.controller;
 import com.shopee.ecommerce_web.dto.request.ApiResponse;
 import com.shopee.ecommerce_web.dto.request.CartCreationRequest;
 import com.shopee.ecommerce_web.dto.response.CartResponse;
+import com.shopee.ecommerce_web.dto.response.CartSummaryResponse;
 import com.shopee.ecommerce_web.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/carts")
@@ -46,9 +48,15 @@ public class CartController {
     // Thêm sản phẩm vào giỏ hàng
     @PostMapping("/{cartId}/items")
     public ApiResponse<CartResponse> addItemToCart(@PathVariable Long cartId,
+<<<<<<< HEAD
                                                    @RequestParam Long productId,
                                                    @RequestParam Integer quantity) {
         CartResponse cartResponse = cartService.addItemToCart(cartId, productId, quantity);
+=======
+                                                   @RequestParam UUID variantId,
+                                                   @RequestParam Integer quantity) {
+        CartResponse cartResponse = cartService.addItemToCart(cartId, variantId, quantity);
+>>>>>>> huy
         return ApiResponse.<CartResponse>builder()
                 .result(cartResponse)
                 .build();
@@ -72,4 +80,45 @@ public class CartController {
                 .result("Cart has been deleted")
                 .build();
     }
+<<<<<<< HEAD
+=======
+
+    @PutMapping("/{cartId}/items/{cartItemId}")
+    public ApiResponse<CartResponse> updateItemQuantity(@PathVariable Long cartId,
+                                                        @PathVariable Long cartItemId,
+                                                        @RequestParam Integer quantity) {
+        CartResponse cartResponse = cartService.updateItemQuantity(cartId, cartItemId, quantity);
+        return ApiResponse.<CartResponse>builder()
+                .result(cartResponse)
+                .build();
+    }
+    // Làm trống giỏ hàng
+    @DeleteMapping("/{cartId}/clear")
+    public ApiResponse<String> clearCart(@PathVariable Long cartId) {
+        cartService.clearCart(cartId);
+        return ApiResponse.<String>builder()
+                .result("Cart has been cleared")
+                .build();
+    }
+    @PostMapping("/{cartId}/checkout")
+    public ApiResponse<String> checkout(@PathVariable Long cartId) {
+        boolean success = cartService.checkout(cartId);
+        if (success) {
+            return ApiResponse.<String>builder()
+                    .result("Checkout successful")
+                    .build();
+        } else {
+            return ApiResponse.<String>builder()
+                    .result("Checkout failed")
+                    .build();
+        }
+    }
+    @GetMapping("/{cartId}/summary")
+    public ApiResponse<CartSummaryResponse> getCartSummary(@PathVariable Long cartId) {
+        CartSummaryResponse summary = cartService.getCartSummary(cartId);
+        return ApiResponse.<CartSummaryResponse>builder()
+                .result(summary)
+                .build();
+    }
+>>>>>>> huy
 }

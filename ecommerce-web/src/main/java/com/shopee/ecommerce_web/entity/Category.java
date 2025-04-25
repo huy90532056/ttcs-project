@@ -1,5 +1,6 @@
 package com.shopee.ecommerce_web.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,8 +35,4 @@ public class Category extends AbstractEntity {
 
     @Column(name = "is_active", nullable = false)
     private Boolean active;
-
-    @ManyToMany(mappedBy = "categories")
-    @JsonIgnore
-    private List<Product> products;
 }

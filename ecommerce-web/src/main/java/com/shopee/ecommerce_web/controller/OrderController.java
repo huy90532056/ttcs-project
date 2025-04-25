@@ -63,4 +63,12 @@ public class OrderController {
                 .result("Order has been deleted")
                 .build();
     }
+    @GetMapping("/user/{userId}")
+    public ApiResponse<List<OrderResponse>> getOrdersByUser(@PathVariable String userId) {
+        List<OrderResponse> orders = orderService.getOrdersByUser(userId);
+        return ApiResponse.<List<OrderResponse>>builder()
+                .result(orders)
+                .build();
+    }
+
 }

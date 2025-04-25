@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,4 +20,7 @@ public class ProductResponse {
     private String productImage;
     private Double productWeight;
     private Boolean published;
+
+    private List<CategoryResponse> categories;
+    private List<TagResponse> tags;
 }
