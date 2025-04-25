@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Payment extends AbstractEntity{
+public class Payment extends AbstractEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,8 @@ public class Payment extends AbstractEntity{
     @NotNull(message = "Payment date is mandatory")
     private LocalDate paymentDate;
 
-    @OneToOne
+    // ✅ Sửa từ @OneToOne -> @ManyToOne
+    @ManyToOne
     @JoinColumn(name = "order_id", referencedColumnName = "orderId")
     private Order order;
 }

@@ -1,5 +1,7 @@
 package com.shopee.ecommerce_web.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -16,6 +18,7 @@ public class OrderItem extends AbstractEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderItemId;
 
+    @JsonBackReference
     @NotNull(message = "Product Variant is mandatory")
     @ManyToOne
     @JoinColumn(name = "variant_id", referencedColumnName = "variantId")  // Liên kết với ProductVariant
@@ -27,6 +30,7 @@ public class OrderItem extends AbstractEntity {
     @NotNull(message = "Total price is mandatory")
     private Double totalPrice;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "order_id", referencedColumnName = "orderId")
     private Order order;

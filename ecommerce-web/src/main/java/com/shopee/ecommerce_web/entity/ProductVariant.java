@@ -1,5 +1,7 @@
 package com.shopee.ecommerce_web.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,6 +38,7 @@ public class ProductVariant extends AbstractEntity{
     private Integer stockQuantity;
     @OneToMany(mappedBy = "productVariant")
     private List<CartItem> cartItems;
+    @JsonManagedReference
     @OneToMany(mappedBy = "productVariant")
     private List<OrderItem> orderItems;
 }

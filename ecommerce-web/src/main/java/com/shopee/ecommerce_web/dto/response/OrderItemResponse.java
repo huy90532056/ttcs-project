@@ -8,7 +8,6 @@ import java.util.UUID;
 @Getter
 @Builder
 public class OrderItemResponse {
-
     private Long orderItemId;
     private UUID variantId;
     private Integer quantity;

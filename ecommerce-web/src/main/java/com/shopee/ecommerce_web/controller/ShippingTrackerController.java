@@ -20,7 +20,6 @@ public class ShippingTrackerController {
 
     ShippingTrackerService shippingTrackerService;
 
-    // Tạo thông tin theo dõi vận chuyển
     @PostMapping
     public ApiResponse<ShippingTrackerResponse> createShippingTracker(@RequestBody ShippingTrackerCreationRequest request) {
         ShippingTrackerResponse response = shippingTrackerService.createShippingTracker(request);
@@ -29,7 +28,6 @@ public class ShippingTrackerController {
                 .build();
     }
 
-    // Lấy tất cả thông tin theo dõi vận chuyển
     @GetMapping
     public ApiResponse<List<ShippingTrackerResponse>> getAllShippingTrackers() {
         List<ShippingTrackerResponse> responses = shippingTrackerService.getShippingTrackers();
@@ -38,7 +36,6 @@ public class ShippingTrackerController {
                 .build();
     }
 
-    // Lấy thông tin theo dõi vận chuyển theo trackingId
     @GetMapping("/{trackingId}")
     public ApiResponse<ShippingTrackerResponse> getShippingTracker(@PathVariable Long trackingId) {
         ShippingTrackerResponse response = shippingTrackerService.getShippingTracker(trackingId);
@@ -47,7 +44,6 @@ public class ShippingTrackerController {
                 .build();
     }
 
-    // Cập nhật thông tin theo dõi vận chuyển
     @PutMapping("/{trackingId}")
     public ApiResponse<ShippingTrackerResponse> updateShippingTracker(@PathVariable Long trackingId, @RequestBody ShippingTrackerUpdateRequest request) {
         ShippingTrackerResponse response = shippingTrackerService.updateShippingTracker(trackingId, request);
@@ -56,7 +52,6 @@ public class ShippingTrackerController {
                 .build();
     }
 
-    // Xóa thông tin theo dõi vận chuyển
     @DeleteMapping("/{trackingId}")
     public ApiResponse<String> deleteShippingTracker(@PathVariable Long trackingId) {
         shippingTrackerService.deleteShippingTracker(trackingId);
