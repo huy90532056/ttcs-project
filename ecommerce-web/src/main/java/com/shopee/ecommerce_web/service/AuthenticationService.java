@@ -18,6 +18,8 @@ import com.shopee.ecommerce_web.repository.InvalidatedTokenRepository;
 import com.shopee.ecommerce_web.repository.httpclient.OutboundIdentityClient;
 import com.shopee.ecommerce_web.repository.UserRepository;
 import com.shopee.ecommerce_web.repository.httpclient.OutboundUserClient;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -72,7 +74,7 @@ public class AuthenticationService {
     @Value("${google.oauth.grant-type}")
     protected String GRANT_TYPE;
 
-    public AuthenticationResponse outboundAuthenticate(String code){
+    public AuthenticationResponse outboundAuthenticate(String code, HttpServletResponse responseHTTP){
         var response = outboundIdentityClient.exchangeToken(ExchangeTokenRequest.builder()
                 .code(code)
                 .clientId(CLIENT_ID)
@@ -100,6 +102,14 @@ public class AuthenticationService {
 
         var token = generateToken(user);
 
+        Cookie cookie = new Cookie("accessToken", token);
+        cookie.setHttpOnly(true); // Bảo vệ khỏi XSS
+        cookie.setSecure(true);
+        cookie.setPath("/");      // Áp dụng cho toàn bộ app
+        cookie.setMaxAge(10 * 60 * 60); // 10 giờ
+
+        responseHTTP.addCookie(cookie); // Gửi cookie đến client
+
         return AuthenticationResponse.builder()
                 .token(token)
                 .build();
@@ -119,7 +129,7 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(AuthenticationRequest request, HttpServletResponse response) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         var user = userRepository
                 .findByUsername(request.getUsername())
@@ -129,47 +139,95 @@ public class AuthenticationService {
 
         if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
-        var token = generateToken(user);
+        var token = generateToken(user); // Tạo JWT
 
-        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+        // Đặt token vào cookie
+        Cookie cookie = new Cookie("accessToken", token);
+        cookie.setHttpOnly(true); // Bảo vệ khỏi XSS
+        cookie.setSecure(true);
+        cookie.setPath("/");      // Áp dụng cho toàn bộ app
+        cookie.setMaxAge(10 * 60 * 60); // 10 giờ
+
+        response.addCookie(cookie); // Gửi cookie đến client
+
+        return AuthenticationResponse.builder()
+                .token(token) // Tuỳ bạn có muốn trả token ở body nữa không
+                .authenticated(true)
+                .build();
     }
 
-    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+
+    public void logout(LogoutRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken(), true);
-
             String jit = signToken.getJWTClaimsSet().getJWTID();
             Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
 
-            InvalidatedToken invalidatedToken =
-                    InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .id(jit)
+                    .expiryTime(expiryTime)
+                    .build();
 
             invalidatedTokenRepository.save(invalidatedToken);
-        } catch (AppException exception){
+
+            // ✅ Xóa cookie accessToken
+            Cookie deleteCookie = new Cookie("accessToken", null);
+            deleteCookie.setPath("/");
+            deleteCookie.setHttpOnly(true);
+            deleteCookie.setSecure(true);
+            deleteCookie.setMaxAge(0); // Xóa ngay lập tức
+            response.addCookie(deleteCookie);
+
+        } catch (AppException exception) {
             log.info("Token already expired");
         }
     }
 
-    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+
+
+    public AuthenticationResponse refreshToken(RefreshRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken(), true);
 
+        // Lấy JWT ID và thời gian hết hạn
         var jit = signedJWT.getJWTClaimsSet().getJWTID();
         var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        InvalidatedToken invalidatedToken =
-                InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
-
+        // Lưu thông tin token đã bị hủy
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
         invalidatedTokenRepository.save(invalidatedToken);
 
+        // Lấy username từ token
         var username = signedJWT.getJWTClaimsSet().getSubject();
+        var user = userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
-        var user =
-                userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
-
+        // Tạo token mới
         var token = generateToken(user);
 
-        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+        // Xóa cookie cũ (token cũ)
+        Cookie oldCookie = new Cookie("accessToken", "");
+        oldCookie.setHttpOnly(true);
+        oldCookie.setSecure(true);  // Đảm bảo secure nếu chạy trên HTTPS
+        oldCookie.setPath("/");     // Áp dụng cho toàn bộ app
+        oldCookie.setMaxAge(0);     // Set MaxAge = 0 để xóa cookie ngay lập tức
+        response.addCookie(oldCookie);
+
+        // Thêm cookie mới với token mới
+        Cookie newCookie = new Cookie("accessToken", token);
+        newCookie.setHttpOnly(true); // Bảo vệ khỏi XSS
+        newCookie.setSecure(true);   // Bật nếu dùng HTTPS
+        newCookie.setPath("/");      // Áp dụng cho toàn bộ app
+        newCookie.setMaxAge(10 * 60 * 60); // Set MaxAge (10 giờ)
+        response.addCookie(newCookie); // Gửi cookie mới tới client
+
+        return AuthenticationResponse.builder()
+                .token(token)  // Tuỳ chọn: bạn có thể trả lại token trong body nếu muốn
+                .authenticated(true)
+                .build();
     }
+
 
     private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -178,7 +236,7 @@ public class AuthenticationService {
                 .subject(user.getUsername())
                 .issuer("devteria.com")
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                .expirationTime(Date.from(Instant.now().plusSeconds(VALID_DURATION)))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .build();
