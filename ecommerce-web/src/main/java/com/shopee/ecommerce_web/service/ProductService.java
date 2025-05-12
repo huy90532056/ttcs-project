@@ -6,10 +6,7 @@ import com.shopee.ecommerce_web.dto.response.CategoryResponse;
 import com.shopee.ecommerce_web.dto.response.PageResponse;
 import com.shopee.ecommerce_web.dto.response.ProductResponse;
 import com.shopee.ecommerce_web.dto.response.TagResponse;
-import com.shopee.ecommerce_web.entity.Category;
-import com.shopee.ecommerce_web.entity.Product;
-import com.shopee.ecommerce_web.entity.ProductVariant;
-import com.shopee.ecommerce_web.entity.Tag;
+import com.shopee.ecommerce_web.entity.*;
 import com.shopee.ecommerce_web.mapper.ProductMapper;
 import com.shopee.ecommerce_web.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,35 +47,44 @@ public class ProductService {
     private SearchRepository searchRepository;
     @Autowired
     private ProductVariantRepository productVariantRepository;
+    @Autowired
+    private FileS3Service fileS3Service;
 
     // Tạo mới Product
-    @CacheEvict(value = "products", allEntries = true) // Xóa cache của danh sách sản phẩm khi tạo mới
+    @CacheEvict(value = "products", allEntries = true)
     public ProductResponse createProduct(ProductCreationRequest productRequest) {
-        // Chuyển ProductCreationRequest thành Product
+        // 1. Upload ảnh lên S3 nếu có file
+        String imageUrl = null;
+        if (productRequest.getProductImageFile() != null && !productRequest.getProductImageFile().isEmpty()) {
+            String uniqueName = "Product Image " + System.currentTimeMillis(); // tạo tên duy nhất
+            FileS3 uploadedFile = fileS3Service.uploadFile(productRequest.getProductImageFile(), uniqueName);
+            imageUrl = uploadedFile.getFileUrl();
+        }
+
+        // 2. Tạo đối tượng Product
         Product product = new Product();
         product.setProductName(productRequest.getProductName());
         product.setSku(productRequest.getSku());
         product.setPrice(productRequest.getPrice());
         product.setDescription(productRequest.getDescription());
-        product.setProductImage(productRequest.getProductImage());
+        product.setProductImage(imageUrl); // Gán URL ảnh từ S3
         product.setProductWeight(productRequest.getProductWeight());
         product.setPublished(productRequest.getPublished());
 
-        // Lưu Product vào database
+        // 3. Lưu vào DB
         Product savedProduct = productRepository.save(product);
 
-        // Tạo ProductVariant với variantName "default" và variantValue "Basic"
+        // 4. Tạo ProductVariant mặc định
         ProductVariant productVariant = new ProductVariant();
         productVariant.setVariantName("default");
         productVariant.setVariantValue("Basic");
-        productVariant.setProduct(savedProduct); // Thiết lập mối quan hệ với Product
-        productVariant.setPrice(savedProduct.getPrice()); // Giá của ProductVariant có thể giống giá của Product
-        productVariant.setStockQuantity(50); // Đặt số lượng tồn kho mặc định là 50
-
-        // Lưu ProductVariant vào database
+        productVariant.setProduct(savedProduct);
+        productVariant.setPrice(savedProduct.getPrice());
+        productVariant.setStockQuantity(50);
+        productVariant.setProductVariantImage(imageUrl);
         productVariantRepository.save(productVariant);
 
-        // Tạo ProductResponse thủ công từ Product đã lưu
+        // 5. Trả về DTO như cũ
         ProductResponse productResponse = new ProductResponse();
         productResponse.setProductId(savedProduct.getProductId());
         productResponse.setProductName(savedProduct.getProductName());
@@ -89,16 +95,15 @@ public class ProductService {
         productResponse.setProductWeight(savedProduct.getProductWeight());
         productResponse.setPublished(savedProduct.getPublished());
 
-        // Map categories (nếu có)
+        // Map categories
         List<CategoryResponse> categoryResponses = Optional.ofNullable(savedProduct.getCategories())
-                .orElse(Collections.emptyList()) // If null, return an empty list
+                .orElse(Collections.emptyList())
                 .stream()
                 .map(category -> {
                     CategoryResponse categoryResponse = new CategoryResponse();
                     categoryResponse.setCategoryId(category.getCategoryId());
                     categoryResponse.setCategoryName(category.getCategoryName());
                     categoryResponse.setCategoryDescription(category.getCategoryDescription());
-                    categoryResponse.setCategoryIcon(category.getCategoryIcon());
                     categoryResponse.setCategoryImagePath(category.getCategoryImagePath());
                     categoryResponse.setActive(category.getActive());
                     return categoryResponse;
@@ -106,9 +111,9 @@ public class ProductService {
                 .collect(Collectors.toList());
         productResponse.setCategories(categoryResponses);
 
-        // Map tags (nếu có)
+        // Map tags
         List<TagResponse> tagResponses = Optional.ofNullable(savedProduct.getTags())
-                .orElse(Collections.emptyList()) // If null, return an empty list
+                .orElse(Collections.emptyList())
                 .stream()
                 .map(tag -> {
                     TagResponse tagResponse = new TagResponse();
@@ -121,6 +126,7 @@ public class ProductService {
 
         return productResponse;
     }
+
 
 
     // Lấy danh sách tất cả sản phẩm
@@ -149,7 +155,6 @@ public class ProductService {
                                 categoryResponse.setCategoryId(category.getCategoryId());
                                 categoryResponse.setCategoryName(category.getCategoryName());
                                 categoryResponse.setCategoryDescription(category.getCategoryDescription());
-                                categoryResponse.setCategoryIcon(category.getCategoryIcon());
                                 categoryResponse.setCategoryImagePath(category.getCategoryImagePath());
                                 categoryResponse.setActive(category.getActive());
                                 return categoryResponse;
@@ -198,7 +203,6 @@ public class ProductService {
                     categoryResponse.setCategoryId(category.getCategoryId());
                     categoryResponse.setCategoryName(category.getCategoryName());
                     categoryResponse.setCategoryDescription(category.getCategoryDescription());
-                    categoryResponse.setCategoryIcon(category.getCategoryIcon());
                     categoryResponse.setCategoryImagePath(category.getCategoryImagePath());
                     categoryResponse.setActive(category.getActive());
                     return categoryResponse;
@@ -256,7 +260,6 @@ public class ProductService {
                     categoryResponse.setCategoryId(category.getCategoryId());
                     categoryResponse.setCategoryName(category.getCategoryName());
                     categoryResponse.setCategoryDescription(category.getCategoryDescription());
-                    categoryResponse.setCategoryIcon(category.getCategoryIcon());
                     categoryResponse.setCategoryImagePath(category.getCategoryImagePath());
                     categoryResponse.setActive(category.getActive());
                     return categoryResponse;
@@ -312,7 +315,6 @@ public class ProductService {
                     categoryResponse.setCategoryId(c.getCategoryId());
                     categoryResponse.setCategoryName(c.getCategoryName());
                     categoryResponse.setCategoryDescription(c.getCategoryDescription());
-                    categoryResponse.setCategoryIcon(c.getCategoryIcon());
                     categoryResponse.setCategoryImagePath(c.getCategoryImagePath());
                     categoryResponse.setActive(c.getActive());
                     return categoryResponse;
@@ -368,7 +370,6 @@ public class ProductService {
                     categoryResponse.setCategoryId(c.getCategoryId());
                     categoryResponse.setCategoryName(c.getCategoryName());
                     categoryResponse.setCategoryDescription(c.getCategoryDescription());
-                    categoryResponse.setCategoryIcon(c.getCategoryIcon());
                     categoryResponse.setCategoryImagePath(c.getCategoryImagePath());
                     categoryResponse.setActive(c.getActive());
                     return categoryResponse;
@@ -424,7 +425,6 @@ public class ProductService {
                                 categoryResponse.setCategoryId(category.getCategoryId());
                                 categoryResponse.setCategoryName(category.getCategoryName());
                                 categoryResponse.setCategoryDescription(category.getCategoryDescription());
-                                categoryResponse.setCategoryIcon(category.getCategoryIcon());
                                 categoryResponse.setCategoryImagePath(category.getCategoryImagePath());
                                 categoryResponse.setActive(category.getActive());
                                 return categoryResponse;
@@ -494,7 +494,6 @@ public class ProductService {
                                 categoryResponse.setCategoryId(category.getCategoryId());
                                 categoryResponse.setCategoryName(category.getCategoryName());
                                 categoryResponse.setCategoryDescription(category.getCategoryDescription());
-                                categoryResponse.setCategoryIcon(category.getCategoryIcon());
                                 categoryResponse.setCategoryImagePath(category.getCategoryImagePath());
                                 categoryResponse.setActive(category.getActive());
                                 return categoryResponse;
@@ -564,7 +563,6 @@ public class ProductService {
                                 categoryResponse.setCategoryId(category.getCategoryId());
                                 categoryResponse.setCategoryName(category.getCategoryName());
                                 categoryResponse.setCategoryDescription(category.getCategoryDescription());
-                                categoryResponse.setCategoryIcon(category.getCategoryIcon());
                                 categoryResponse.setCategoryImagePath(category.getCategoryImagePath());
                                 categoryResponse.setActive(category.getActive());
                                 return categoryResponse;
@@ -621,7 +619,6 @@ public class ProductService {
                         categoryResponse.setCategoryId(category.getCategoryId());
                         categoryResponse.setCategoryName(category.getCategoryName());
                         categoryResponse.setCategoryDescription(category.getCategoryDescription());
-                        categoryResponse.setCategoryIcon(category.getCategoryIcon());
                         categoryResponse.setCategoryImagePath(category.getCategoryImagePath());
                         categoryResponse.setActive(category.getActive());
                         return categoryResponse;
@@ -639,6 +636,57 @@ public class ProductService {
                     })
                     .collect(Collectors.toList());
             response.setTags(tagResponses);
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+    public List<ProductResponse> getProductsByTag(String tagId) {
+        // Lấy tất cả sản phẩm
+        List<Product> allProducts = productRepository.findAll();
+
+        // Lọc sản phẩm có chứa tagId
+        List<Product> filteredProducts = allProducts.stream()
+                .filter(product -> product.getTags().stream()
+                        .anyMatch(tag -> tag.getTagId().equals(tagId)))
+                .collect(Collectors.toList());
+
+        // Map sang ProductResponse
+        return filteredProducts.stream().map(product -> {
+            ProductResponse response = new ProductResponse();
+            response.setProductId(product.getProductId());
+            response.setProductName(product.getProductName());
+            response.setSku(product.getSku());
+            response.setPrice(product.getPrice());
+            response.setDescription(product.getDescription());
+            response.setProductImage(product.getProductImage());
+            response.setProductWeight(product.getProductWeight());
+            response.setPublished(product.getPublished());
+
+            // Map danh mục (categories)
+            List<CategoryResponse> categoryResponses = product.getCategories().stream()
+                    .map(category -> {
+                        CategoryResponse categoryResponse = new CategoryResponse();
+                        categoryResponse.setCategoryId(category.getCategoryId());
+                        categoryResponse.setCategoryName(category.getCategoryName());
+                        categoryResponse.setCategoryDescription(category.getCategoryDescription());
+                        categoryResponse.setCategoryImagePath(category.getCategoryImagePath());
+                        categoryResponse.setActive(category.getActive());
+                        return categoryResponse;
+                    })
+                    .collect(Collectors.toList());
+            response.setCategories(categoryResponses);
+
+            // Map tags
+            List<TagResponse> tagResponses = product.getTags().stream()
+                    .map(tag -> {
+                        TagResponse tagResponse = new TagResponse();
+                        tagResponse.setTagId(tag.getTagId());
+                        tagResponse.setTagName(tag.getTagName());
+                        return tagResponse;
+                    })
+                    .collect(Collectors.toList());
+            response.setTags(tagResponses);
+
             return response;
         }).collect(Collectors.toList());
     }

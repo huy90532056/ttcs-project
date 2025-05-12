@@ -3,9 +3,11 @@ package com.shopee.ecommerce_web.service;
 import com.shopee.ecommerce_web.dto.request.CategoryDto;
 import com.shopee.ecommerce_web.dto.response.CategoryResponse;
 import com.shopee.ecommerce_web.entity.Category;
+import com.shopee.ecommerce_web.entity.FileS3;
 import com.shopee.ecommerce_web.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,16 +18,31 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public CategoryResponse createCategory(CategoryDto categoryDto) {
+    private final FileS3Service fileS3Service;
+
+    public CategoryResponse createCategory(CategoryDto categoryDto, MultipartFile categoryImage) {
+        long imageCount = categoryRepository.count(); // Hoặc bạn có thể dùng một cách khác để đếm số ảnh
+
+        // Tạo tên file với số tự động
+        String fileName = "Category Image " + (imageCount + 1);
+
+        // Upload ảnh lên S3 và lấy URL của file đã upload
+        FileS3 uploadedFile = fileS3Service.uploadFile(categoryImage, fileName);
+
+        // Tạo đối tượng Category từ CategoryDto
         Category category = new Category();
         category.setCategoryName(categoryDto.getCategoryName());
         category.setCategoryDescription(categoryDto.getCategoryDescription());
-        category.setCategoryIcon(categoryDto.getCategoryIcon());
-        category.setCategoryImagePath(categoryDto.getCategoryImagePath());
+        category.setCategoryImagePath(uploadedFile.getFileUrl()); // Set đường dẫn ảnh đã upload
         category.setActive(categoryDto.getActive() != null ? categoryDto.getActive() : true);
+
+        // Lưu category vào cơ sở dữ liệu
         Category saved = categoryRepository.save(category);
+
+        // Trả về thông tin category đã lưu
         return toResponse(saved);
     }
+
 
     public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findAll()
@@ -46,7 +63,6 @@ public class CategoryService {
 
         category.setCategoryName(categoryDto.getCategoryName());
         category.setCategoryDescription(categoryDto.getCategoryDescription());
-        category.setCategoryIcon(categoryDto.getCategoryIcon());
         category.setCategoryImagePath(categoryDto.getCategoryImagePath());
         category.setActive(categoryDto.getActive());
 
@@ -65,7 +81,6 @@ public class CategoryService {
                 .categoryId(category.getCategoryId())
                 .categoryName(category.getCategoryName())
                 .categoryDescription(category.getCategoryDescription())
-                .categoryIcon(category.getCategoryIcon())
                 .categoryImagePath(category.getCategoryImagePath())
                 .active(category.getActive())
                 .build();

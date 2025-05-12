@@ -14,7 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class InvalidatedToken {
+public class InvalidatedToken extends AbstractEntity{
     @Id
     String id;
     Date expiryTime;

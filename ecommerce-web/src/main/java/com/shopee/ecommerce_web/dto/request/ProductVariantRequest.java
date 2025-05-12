@@ -2,15 +2,13 @@ package com.shopee.ecommerce_web.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
-@Getter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ProductVariantRequest {
 
     @NotBlank(message = "Variant name is required")
@@ -21,6 +19,7 @@ public class ProductVariantRequest {
 
     @NotNull(message = "Price is required")
     private Double price;
+    private MultipartFile productVariantImageFile;
 
     @NotNull(message = "Stock quantity is required")
     private Integer stockQuantity;

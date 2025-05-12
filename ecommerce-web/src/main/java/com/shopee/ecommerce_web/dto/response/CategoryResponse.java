@@ -13,7 +13,6 @@ public class CategoryResponse {
     private String categoryId;
     private String categoryName;
     private String categoryDescription;
-    private String categoryIcon;
     private String categoryImagePath;
     private Boolean active;
 }

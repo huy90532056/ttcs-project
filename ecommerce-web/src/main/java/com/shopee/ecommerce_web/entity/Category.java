@@ -27,9 +27,6 @@ public class Category extends AbstractEntity {
     @Column(name = "category_description")
     private String categoryDescription;
 
-    @Column(name = "category_icon")
-    private String categoryIcon;
-
     @Column(name = "category_image_path")
     private String categoryImagePath;
 

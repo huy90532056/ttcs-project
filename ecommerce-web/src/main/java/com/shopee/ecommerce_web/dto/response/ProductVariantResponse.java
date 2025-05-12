@@ -17,6 +17,7 @@ public class ProductVariantResponse {
     private String variantName;
     private String variantValue;
     private Double price;
+    private String productVariantImage;
     private Integer stockQuantity;
     private Long productId;
 }

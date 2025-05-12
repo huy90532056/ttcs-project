@@ -13,7 +13,6 @@ public class CategoryDto {
     private String categoryName;
 
     private String categoryDescription;
-    private String categoryIcon;
     private String categoryImagePath;
     private Boolean active;
 }

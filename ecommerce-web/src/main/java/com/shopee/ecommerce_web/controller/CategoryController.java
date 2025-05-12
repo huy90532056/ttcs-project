@@ -3,12 +3,14 @@ package com.shopee.ecommerce_web.controller;
 import com.shopee.ecommerce_web.dto.request.ApiResponse;
 import com.shopee.ecommerce_web.dto.request.CategoryDto;
 import com.shopee.ecommerce_web.dto.response.CategoryResponse;
+import com.shopee.ecommerce_web.entity.FileS3;
 import com.shopee.ecommerce_web.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,9 +22,19 @@ public class CategoryController {
 
     CategoryService categoryService;
 
+
     @PostMapping
-    public ApiResponse<CategoryResponse> createCategory(@RequestBody @Valid CategoryDto categoryDto) {
-        CategoryResponse response = categoryService.createCategory(categoryDto);
+    public ApiResponse<CategoryResponse> createCategory(@RequestParam("categoryName") String categoryName,
+                                                        @RequestParam("categoryDescription") String categoryDescription,
+                                                        @RequestParam("active") Boolean active,
+                                                        @RequestParam("categoryImage") MultipartFile categoryImage) {
+
+        // Tạo CategoryDto từ các tham số
+        CategoryDto categoryDto = new CategoryDto(categoryName, categoryDescription, null, active);
+
+        // Gọi service để tạo category
+        CategoryResponse response = categoryService.createCategory(categoryDto, categoryImage);
+
         return ApiResponse.<CategoryResponse>builder()
                 .result(response)
                 .build();

@@ -1,11 +1,15 @@
 package com.shopee.ecommerce_web.controller;
 
 import com.shopee.ecommerce_web.dto.request.ApiResponse;
+import com.shopee.ecommerce_web.dto.request.ProductCreationRequest;
 import com.shopee.ecommerce_web.dto.request.ProductVariantRequest;
+import com.shopee.ecommerce_web.dto.response.ProductResponse;
 import com.shopee.ecommerce_web.dto.response.ProductVariantResponse;
 import com.shopee.ecommerce_web.service.ProductVariantService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,11 +23,14 @@ public class ProductVariantController {
     private final ProductVariantService productVariantService;
 
     // Tạo mới ProductVariant
-    @PostMapping
-    public ApiResponse<ProductVariantResponse> createProductVariant(@RequestBody ProductVariantRequest request) {
-        ApiResponse<ProductVariantResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(productVariantService.createProductVariant(request));
-        return apiResponse;
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductVariantResponse> createProductVariant(@ModelAttribute @Valid ProductVariantRequest request) {
+        System.out.println(request.getVariantValue() + " " + request.getVariantName() + request.getProductVariantImageFile() + " " + request.getPrice());
+        ProductVariantResponse response = productVariantService.createProductVariant(request);
+
+        return ApiResponse.<ProductVariantResponse>builder()
+                .result(response)
+                .build();
     }
 
     // Lấy danh sách tất cả ProductVariants
@@ -53,8 +60,19 @@ public class ProductVariantController {
 
     // Xóa ProductVariant
     @DeleteMapping("/{variantId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProductVariant(@PathVariable("variantId") UUID variantId) {
+    public ApiResponse<String> deleteProductVariant(@PathVariable("variantId") UUID variantId) {
         productVariantService.deleteProductVariant(variantId);
+        return ApiResponse.<String>builder()
+                .result("ProductVariant has been deleted")
+                .build();
+    }
+
+
+    @GetMapping("/product/{productId}")
+    public ApiResponse<List<ProductVariantResponse>> getProductVariantsByProductId(@PathVariable("productId") Long productId) {
+        List<ProductVariantResponse> responses = productVariantService.getProductVariantsByProductId(productId);
+        return ApiResponse.<List<ProductVariantResponse>>builder()
+                .result(responses)
+                .build();
     }
 }

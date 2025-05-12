@@ -9,6 +9,7 @@ import com.shopee.ecommerce_web.service.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +22,8 @@ public class ProductController {
     private ProductService productService;
 
     // Tạo sản phẩm mới
-    @PostMapping()
-    public ApiResponse<ProductResponse> createProduct(@RequestBody @Valid ProductCreationRequest request) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductResponse> createProduct(@ModelAttribute @Valid ProductCreationRequest request) {
         ProductResponse productResponse = productService.createProduct(request);
         return ApiResponse.<ProductResponse>builder()
                 .result(productResponse)
@@ -141,6 +142,15 @@ public class ProductController {
     @GetMapping("/category/{categoryId}")
     public ApiResponse<List<ProductResponse>> getProductsByCategory(@PathVariable("categoryId") String categoryId) {
         List<ProductResponse> products = productService.getProductsByCategory(categoryId);
+        return ApiResponse.<List<ProductResponse>>builder()
+                .result(products)
+                .build();
+    }
+
+    // Lấy tất cả sản phẩm theo tag
+    @GetMapping("/tag/{tagId}")
+    public ApiResponse<List<ProductResponse>> getProductsByTag(@PathVariable("tagId") String tagId) {
+        List<ProductResponse> products = productService.getProductsByTag(tagId);
         return ApiResponse.<List<ProductResponse>>builder()
                 .result(products)
                 .build();

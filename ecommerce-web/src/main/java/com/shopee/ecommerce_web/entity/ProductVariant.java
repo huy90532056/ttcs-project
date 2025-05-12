@@ -33,6 +33,7 @@ public class ProductVariant extends AbstractEntity{
 
     @Column(name = "price")
     private Double price;
+    private String productVariantImage;
 
     @Column(name = "stock_quantity")
     private Integer stockQuantity;
