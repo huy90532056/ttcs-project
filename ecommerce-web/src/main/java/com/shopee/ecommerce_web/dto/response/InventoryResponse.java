@@ -16,5 +16,6 @@ public class InventoryResponse {
 
     private Long inventoryId;
     private String userId;
+    private String inventoryImagePath;
     private List<ProductInventory> productInventories;
 }

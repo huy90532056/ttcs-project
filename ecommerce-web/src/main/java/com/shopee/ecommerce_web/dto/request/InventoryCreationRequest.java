@@ -1,15 +1,12 @@
 package com.shopee.ecommerce_web.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class InventoryCreationRequest {
-
     private String userId;
+    private MultipartFile imageFile;
 }

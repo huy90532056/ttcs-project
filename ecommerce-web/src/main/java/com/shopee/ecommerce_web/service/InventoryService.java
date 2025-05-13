@@ -2,6 +2,7 @@ package com.shopee.ecommerce_web.service;
 
 import com.shopee.ecommerce_web.dto.request.InventoryCreationRequest;
 import com.shopee.ecommerce_web.dto.response.InventoryResponse;
+import com.shopee.ecommerce_web.entity.FileS3;
 import com.shopee.ecommerce_web.entity.Inventory;
 import com.shopee.ecommerce_web.entity.ProductInventory;
 import com.shopee.ecommerce_web.entity.User;
@@ -27,30 +28,42 @@ public class InventoryService {
     UserRepository userRepository;  // Thêm UserRepository để tìm User từ ID
     ProductInventoryRepository productInventoryRepository;  // Giả sử có repository cho ProductInventory
 
+    FileS3Service fileS3Service;  // Giả sử có service để upload file lên S3
     // Create new Inventory
     public InventoryResponse createInventory(InventoryCreationRequest request) {
-        // Tìm kiếm User từ ID trong request
-        User user = userRepository.findById(request.getUserId())  // Giả sử ID của User được cung cấp trong request
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));  // Nếu không tìm thấy User, throw Exception
+        // Tìm kiếm User
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        // Tạo mới Inventory và thiết lập User
+        // Upload ảnh nếu có
+        String imageUrl = null;
+        if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
+            String uniqueName = "inventory_" + System.currentTimeMillis();
+            FileS3 uploadedFile = fileS3Service.uploadFile(request.getImageFile(), uniqueName);
+            imageUrl = uploadedFile.getFileUrl();
+        }
+
+        // Tạo mới Inventory
         Inventory inventory = new Inventory();
         inventory.setUser(user);
+        inventory.setInventoryImage(imageUrl); // lưu URL ảnh
 
-        // Lưu Inventory vào database
+        // Lưu vào DB
         inventory = inventoryRepository.save(inventory);
 
-        // Lấy danh sách ProductInventory liên quan đến Inventory (giả sử Inventory có mối quan hệ với ProductInventory)
+        // Lấy danh sách ProductInventory liên quan
         List<ProductInventory> productInventories = productInventoryRepository.findByInventory(inventory);
 
-        // Chuyển đổi Inventory thành InventoryResponse
+        // Trả response
         InventoryResponse response = new InventoryResponse();
         response.setInventoryId(inventory.getInventoryId());
-        response.setUserId(inventory.getUser().getId()); // Giả sử User có phương thức getUserId()
-        response.setProductInventories(productInventories); // Thêm productInventories vào response
+        response.setUserId(user.getId());
+        response.setInventoryImagePath(imageUrl); // gán URL ảnh vào response
+        response.setProductInventories(productInventories);
 
         return response;
     }
+
 
     // Get all Inventories
     public List<InventoryResponse> getInventories() {
@@ -59,12 +72,14 @@ public class InventoryService {
                     List<ProductInventory> productInventories = productInventoryRepository.findByInventory(inventory);
                     InventoryResponse response = new InventoryResponse();
                     response.setInventoryId(inventory.getInventoryId());
-                    response.setUserId(inventory.getUser().getId()); // Assuming user has getUserId() method
-                    response.setProductInventories(productInventories); // Thêm productInventories vào response
+                    response.setUserId(inventory.getUser().getId());
+                    response.setInventoryImagePath(inventory.getInventoryImage()); // Thêm dòng này
+                    response.setProductInventories(productInventories);
                     return response;
                 })
                 .toList();
     }
+
 
     // Get Inventory by ID
     public InventoryResponse getInventory(Long inventoryId) {
@@ -75,10 +90,13 @@ public class InventoryService {
 
         InventoryResponse response = new InventoryResponse();
         response.setInventoryId(inventory.getInventoryId());
-        response.setUserId(inventory.getUser().getId()); // Assuming user has getUserId() method
-        response.setProductInventories(productInventories); // Thêm productInventories vào response
+        response.setUserId(inventory.getUser().getId());
+        response.setInventoryImagePath(inventory.getInventoryImage()); // Thêm dòng này
+        response.setProductInventories(productInventories);
+
         return response;
     }
+
 
     // Delete Inventory
     public void deleteInventory(Long inventoryId) {
@@ -98,9 +116,11 @@ public class InventoryService {
             InventoryResponse response = new InventoryResponse();
             response.setInventoryId(inventory.getInventoryId());
             response.setUserId(inventory.getUser().getId());
-            response.setProductInventories(productInventories); // Thêm productInventories vào response
+            response.setInventoryImagePath(inventory.getInventoryImage()); // Thêm dòng này
+            response.setProductInventories(productInventories);
             return response;
         }).toList();
     }
+
 }
 

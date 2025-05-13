@@ -7,6 +7,7 @@ import com.shopee.ecommerce_web.service.InventoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,13 +22,14 @@ public class InventoryController {
     InventoryService inventoryService;
 
     // Create a new Inventory
-    @PostMapping
-    public ApiResponse<InventoryResponse> createInventory(@RequestBody InventoryCreationRequest request) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<InventoryResponse> createInventory(@ModelAttribute InventoryCreationRequest request) {
         InventoryResponse inventoryResponse = inventoryService.createInventory(request);
         return ApiResponse.<InventoryResponse>builder()
                 .result(inventoryResponse)
                 .build();
     }
+
 
     // Get all Inventories
     @GetMapping

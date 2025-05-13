@@ -25,6 +25,8 @@ public class Inventory extends AbstractEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    private String inventoryImage;
+
     @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ProductInventory> productInventories = new ArrayList<>();
