@@ -6,8 +6,8 @@ import lombok.*;
 
 import java.util.Date;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DiscountCreationRequest {
@@ -19,4 +19,5 @@ public class DiscountCreationRequest {
     private Date validFrom;
 
     private Date validUntil;
+
 }

@@ -31,6 +31,13 @@ public class CartService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        // Kiểm tra xem user đã có cart chưa
+        Cart existingCart = cartRepository.findByUserId(user.getId()).orElse(null);
+        if (existingCart != null) {
+            return mapToCartResponse(existingCart);
+        }
+
+        // Nếu chưa có thì tạo mới
         Cart cart = new Cart();
         cart.setUser(user);
 
@@ -38,6 +45,7 @@ public class CartService {
 
         return mapToCartResponse(cart);
     }
+
 
     // Lấy thông tin giỏ hàng theo ID
     public CartResponse getCart(Long cartId) {
@@ -181,4 +189,11 @@ public class CartService {
 
         return cartResponse;
     }
+
+    public CartResponse getCartByUserId(String userId) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+        return mapToCartResponse(cart);
+    }
+
 }

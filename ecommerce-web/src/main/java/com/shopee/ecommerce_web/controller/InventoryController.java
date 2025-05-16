@@ -64,4 +64,12 @@ public class InventoryController {
                 .result(responses)
                 .build();
     }
+
+    @GetMapping("/product/{productId}")
+    public ApiResponse<Long> getInventoryIdByProductId(@PathVariable Long productId) {
+        Long inventoryId = inventoryService.getInventoryIdByProductId(productId);
+        return ApiResponse.<Long>builder()
+                .result(inventoryId)
+                .build();
+    }
 }

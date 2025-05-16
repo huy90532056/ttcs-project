@@ -91,14 +91,6 @@ public class CartItemService {
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
 
-        ProductVariant productVariant = productVariantRepository.findById(request.getVariantId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
-        cartItem.setProductVariant(productVariant);
-
-        Cart cart = cartRepository.findById(request.getCartId())
-                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
-        cartItem.setCart(cart);
-
         cartItem.setQuantity(request.getQuantity());
 
         return toResponse(cartItemRepository.save(cartItem));

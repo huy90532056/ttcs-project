@@ -32,14 +32,14 @@ public class Order extends AbstractEntity {
     @NotNull(message = "Status is mandatory")
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+    private String shippingMethod;
+
+    private String paymentMethod;
+
+    private Double amount;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Payment> payments;
-
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ShippingTracker shipping;
 }

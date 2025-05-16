@@ -30,6 +30,9 @@ public enum ErrorCode {
     ADDRESS_NOT_FOUND(1021, "address not found!", HttpStatus.NOT_FOUND),
     PASSWORD_EXISTED(1022, "password existed!", HttpStatus.BAD_REQUEST),
     TOKEN_EXPIRED(1023, "token expired!", HttpStatus.GONE),
+    REVIEW_NOT_FOUND(1024, "review not found!", HttpStatus.NOT_FOUND),
+    DISCOUNT_NOT_FOUND(1025, "discount not found!", HttpStatus.NOT_FOUND),
+    USER_DISCOUNT_NOT_FOUND(1026, "user_discount not found!", HttpStatus.NOT_FOUND)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

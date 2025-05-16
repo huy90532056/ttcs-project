@@ -19,7 +19,6 @@ public class Discount extends AbstractEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long discountId;
-
     @NotBlank(message = "Discount code is mandatory")
     private String discountCode;
 

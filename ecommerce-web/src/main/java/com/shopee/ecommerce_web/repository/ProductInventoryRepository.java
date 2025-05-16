@@ -10,4 +10,7 @@ import java.util.List;
 @Repository
 public interface ProductInventoryRepository extends JpaRepository<ProductInventory, Long> {
     List<ProductInventory> findByInventory(Inventory inventory);
+
+    List<ProductInventory> findByProduct_ProductId(Long productId);
+
 }

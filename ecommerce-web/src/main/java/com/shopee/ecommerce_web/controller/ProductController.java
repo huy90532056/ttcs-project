@@ -125,19 +125,47 @@ public class ProductController {
                 .build();
     }
 
-    // Lấy danh sách sản phẩm với phân trang, sắp xếp, tìm kiếm và nhiều category
+    // tìm kiếm sản phẩm theo tên
     @GetMapping("/list/sort/multiple/search")
     public ApiResponse<PageResponse<?>> getAllProductsPagingSortByMultipleCategorySearch(
             @RequestParam(defaultValue = "0", required = false) int pageNo,
             @Min(5) @RequestParam(defaultValue = "10", required = false) int pageSize,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String sortBy
+            @RequestParam(required = false) String search
     ) {
-        PageResponse<?> pageResponse = productService.getAllProductsPagingSortByMultipleCategorySearch(pageNo, pageSize, search, sortBy);
+        PageResponse<?> pageResponse = productService.getAllProductsPagingSortByMultipleCategorySearch(pageNo, pageSize, search);
         return ApiResponse.<PageResponse<?>>builder()
                 .result(pageResponse)
                 .build();
     }
+
+    // Tìm kiếm sản phẩm theo tên, phân trang, sắp xếp theo giá (price ASC/DESC), theo chuẩn bạn muốn
+    @GetMapping("/list/sort/search")
+    public ApiResponse<PageResponse<?>> getAllProductsPagingSortByPriceAndSearch(
+            @RequestParam(defaultValue = "0", required = false) int pageNo,
+            @Min(5) @RequestParam(defaultValue = "10", required = false) int pageSize,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "asc", required = false) String sortDir
+    ) {
+        PageResponse<?> pageResponse = productService.getAllProductsPagingSortByPriceAndSearch(pageNo, pageSize, search, sortDir);
+        return ApiResponse.<PageResponse<?>>builder()
+                .result(pageResponse)
+                .build();
+    }
+
+    @GetMapping("/list/sort/category")
+    public ApiResponse<PageResponse<?>> searchProductsByCategory(
+            @RequestParam(defaultValue = "1") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String categoryId,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        PageResponse<?> pageResponse = productService.getProductsPagingSortByCategory(pageNo, pageSize, categoryId, sortDir);
+        return ApiResponse.<PageResponse<?>>builder()
+                .result(pageResponse)
+                .build();
+    }
+
+
     // Lấy tất cả sản phẩm theo category
     @GetMapping("/category/{categoryId}")
     public ApiResponse<List<ProductResponse>> getProductsByCategory(@PathVariable("categoryId") String categoryId) {
@@ -146,6 +174,7 @@ public class ProductController {
                 .result(products)
                 .build();
     }
+
 
     // Lấy tất cả sản phẩm theo tag
     @GetMapping("/tag/{tagId}")

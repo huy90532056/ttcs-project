@@ -596,8 +596,16 @@ public class ProductService {
 
 
     // Lấy danh sách sản phẩm có phân trang, sắp xếp, lọc theo category và tìm kiếm
-    public PageResponse<?> getAllProductsPagingSortByMultipleCategorySearch(int pageNo, int pageSize, String search, String sortBy) {
-        return searchRepository.getAllProductsPagingSortByMultipleCategorySearch(pageNo, pageSize, search, sortBy);
+    public PageResponse<?> getAllProductsPagingSortByMultipleCategorySearch(int pageNo, int pageSize, String search) {
+        return searchRepository.getAllProductsPagingSortByMultipleCategorySearch(pageNo, pageSize, search);
+    }
+
+    public PageResponse<?> getAllProductsPagingSortByPriceAndSearch(int pageNo, int pageSize, String search, String sortDir) {
+        return searchRepository.getAllProductsPagingSortByNameAndPrice(pageNo, pageSize, search, sortDir);
+    }
+
+    public PageResponse<?> getProductsPagingSortByCategory(int pageNo, int pageSize, String categoryId, String sortDir) {
+        return searchRepository.getProductsPagingSortByCategory(pageNo, pageSize, categoryId, sortDir);
     }
 
     public List<ProductResponse> getProductsByCategory(String categoryId) {

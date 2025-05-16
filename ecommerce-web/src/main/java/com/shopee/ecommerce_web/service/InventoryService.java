@@ -122,5 +122,18 @@ public class InventoryService {
         }).toList();
     }
 
+    // Get a single Inventory ID by Product ID
+    public Long getInventoryIdByProductId(Long productId) {
+        List<ProductInventory> productInventories = productInventoryRepository.findByProduct_ProductId(productId);
+
+        if (productInventories.isEmpty()) {
+            throw new AppException(ErrorCode.INVENTORY_NOT_EXISTED); // hoặc PRODUCT_NOT_EXISTED nếu bạn có
+        }
+
+        // Trả về inventoryId đầu tiên tìm được
+        return productInventories.get(0).getInventory().getInventoryId();
+    }
+
+
 }
 

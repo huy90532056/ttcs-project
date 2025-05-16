@@ -112,4 +112,12 @@ public class CartController {
                 .result(summary)
                 .build();
     }
+    @GetMapping("/user/{userId}")
+    public ApiResponse<CartResponse> getCartByUserId(@PathVariable String userId) {
+        CartResponse cartResponse = cartService.getCartByUserId(userId);
+        return ApiResponse.<CartResponse>builder()
+                .result(cartResponse)
+                .build();
+    }
+
 }
