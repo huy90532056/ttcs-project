@@ -22,7 +22,6 @@ public class Tag extends AbstractEntity{
 
     @Column(name = "tag_name", nullable = false, unique = true)
     private String tagName;
-
     @ManyToMany(mappedBy = "tags")
     @JsonIgnore
     private List<Product> products;

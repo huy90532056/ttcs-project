@@ -11,14 +11,14 @@ import java.util.UUID;
 public class OrderItemCreationRequest {
 
     @NotNull(message = "Variant ID is mandatory")
-    private UUID variantId; // ID của ProductVariant (thay vì Product)
+    private UUID variantId;
 
     @NotNull(message = "Quantity is mandatory")
-    private Integer quantity; // Số lượng sản phẩm
+    private Integer quantity;
 
     @NotNull(message = "Total price is mandatory")
-    private Double totalPrice; // Tổng giá cho sản phẩm
+    private Double totalPrice;
 
     @NotNull(message = "Order ID is mandatory")
-    private Long orderId; // ID của đơn hàng liên kết
+    private Long orderId;
 }

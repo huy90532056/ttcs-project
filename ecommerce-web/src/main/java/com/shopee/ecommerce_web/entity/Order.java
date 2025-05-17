@@ -37,6 +37,7 @@ public class Order extends AbstractEntity {
     private String paymentMethod;
 
     private Double amount;
+    private String shipperId;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

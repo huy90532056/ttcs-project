@@ -26,7 +26,8 @@ public class OrderResponse {
 
     private String paymentMethod;
 
-    private Double amount; // Nếu không truyền từ client thì có thể tính lại phía server
+    private Double amount;
+    private String shipperId;
 
     private List<OrderItemResponse> items; // Danh sách sản phẩm trong đơn hàng
 }

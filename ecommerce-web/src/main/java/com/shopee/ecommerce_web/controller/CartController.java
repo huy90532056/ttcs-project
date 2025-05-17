@@ -85,7 +85,7 @@ public class CartController {
                 .build();
     }
     // Làm trống giỏ hàng
-    @DeleteMapping("/{cartId}/clear")
+    @PutMapping("/{cartId}/clear")
     public ApiResponse<String> clearCart(@PathVariable Long cartId) {
         cartService.clearCart(cartId);
         return ApiResponse.<String>builder()

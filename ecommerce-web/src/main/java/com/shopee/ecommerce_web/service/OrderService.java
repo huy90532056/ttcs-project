@@ -39,7 +39,7 @@ public class OrderService {
                 .shippingMethod(request.getShippingMethod())
                 .paymentMethod(request.getPaymentMethod())
                 .amount(request.getAmount())
-                .build();
+                .build(); // Không set shipperId
 
         order = orderRepository.save(order);
 
@@ -52,6 +52,7 @@ public class OrderService {
 
         return mapToOrderResponse(order);
     }
+
 
     public List<OrderResponse> getOrders() {
         return orderRepository.findAll().stream()
@@ -70,6 +71,7 @@ public class OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         order.setStatus(OrderStatus.valueOf(request.getStatus()));
+        order.setShipperId(request.getShipperId());
         order = orderRepository.save(order);
 
         return mapToOrderResponse(order);
@@ -99,10 +101,9 @@ public class OrderService {
                 .shippingMethod(order.getShippingMethod())
                 .paymentMethod(order.getPaymentMethod())
                 .amount(order.getAmount())
-
-                // Sửa ở đây: dùng Optional để tránh null
+                .shipperId(order.getShipperId())
                 .items(Optional.ofNullable(order.getItems())
-                        .orElse(Collections.emptyList())  // nếu null thì trả về list rỗng
+                        .orElse(Collections.emptyList())
                         .stream()
                         .map(item -> OrderItemResponse.builder()
                                 .orderItemId(item.getOrderItemId())
@@ -113,5 +114,6 @@ public class OrderService {
                         .collect(Collectors.toList()))
                 .build();
     }
+
 
 }

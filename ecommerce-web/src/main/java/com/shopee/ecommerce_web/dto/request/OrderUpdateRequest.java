@@ -7,5 +7,6 @@ import lombok.Setter;
 @Setter
 public class OrderUpdateRequest {
 
-    private String status; // Trạng thái đơn hàng (ví dụ: "PENDING", "COMPLETED", "CANCELLED")
+    private String status;
+    private String shipperId;
 }
