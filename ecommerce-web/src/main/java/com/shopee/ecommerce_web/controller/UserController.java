@@ -1,9 +1,6 @@
 package com.shopee.ecommerce_web.controller;
 
-import com.shopee.ecommerce_web.dto.request.ApiResponse;
-import com.shopee.ecommerce_web.dto.request.PasswordCreationRequest;
-import com.shopee.ecommerce_web.dto.request.UserCreationRequest;
-import com.shopee.ecommerce_web.dto.request.UserUpdateRequest;
+import com.shopee.ecommerce_web.dto.request.*;
 import com.shopee.ecommerce_web.dto.response.UserResponse;
 import com.shopee.ecommerce_web.service.UserService;
 import jakarta.validation.Valid;
@@ -79,4 +76,21 @@ public class UserController {
                 .result(userService.updateUser(userId, request))
                 .build();
     }
+
+    @PostMapping("/searchByUsername")
+    public ApiResponse<String> findUserIdByUsername(@RequestBody UsernameRequest request) {
+        String userId = userService.findUserIdByUsername(request.getUsername());
+        return ApiResponse.<String>builder()
+                .result(userId)
+                .build();
+    }
+
+    @PostMapping("/change-password")
+    public ApiResponse<String> changePassword(@RequestBody ChangePasswordRequest request) {
+        userService.changePassword(request.getId(), request.getNewPassword());
+        return ApiResponse.<String>builder()
+                .result("Password changed successfully")
+                .build();
+    }
+
 }

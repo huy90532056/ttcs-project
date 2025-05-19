@@ -18,11 +18,11 @@ public class MessageConsumer {
     @RabbitListener(queues = MQConfig.QUEUE)
     public void consumeNotification(CustomMessage message) {
         System.out.println(message.getMessage());
-        Notification notification = new Notification();
-        notification.setMessage("Ban da order thanh cong!");
-
         User user = userRepository.findById(message.getMessage())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        Notification notification = new Notification();
+        notification.setMessage("Cam on " + user.getUsername() + ",ban da order thanh cong!");
+
 
         notification.setUser(user);
         notificationRepository.save(notification);

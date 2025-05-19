@@ -1,5 +1,6 @@
 package com.shopee.ecommerce_web.service;
 
+import com.shopee.ecommerce_web.dto.request.ChangePasswordRequest;
 import com.shopee.ecommerce_web.dto.request.PasswordCreationRequest;
 import com.shopee.ecommerce_web.dto.request.UserCreationRequest;
 import com.shopee.ecommerce_web.dto.request.UserUpdateRequest;
@@ -23,6 +24,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -98,4 +100,19 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found")));
     }
+
+    public String findUserIdByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return user.getId();
+    }
+
+    public void changePassword(String userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
 }

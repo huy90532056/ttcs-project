@@ -61,7 +61,6 @@ public class TagService {
         TagResponse response = new TagResponse();
         response.setTagId(tag.getTagId());
         response.setTagName(tag.getTagName());
-        response.setTagDescription(tag.getTagDescription());
 
         return response;
     }

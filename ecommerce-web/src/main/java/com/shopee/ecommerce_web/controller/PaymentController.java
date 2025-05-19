@@ -11,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -75,22 +76,44 @@ public class PaymentController {
     }
 
     @GetMapping("/vn-pay-callback")
-    public ApiResponse<PaymentDTO.VNPayResponse> payCallbackHandler(HttpServletRequest request) {
+    public ResponseEntity<String> payCallbackHandler(HttpServletRequest request) {
         String status = request.getParameter("vnp_ResponseCode");
 
-        // Khởi tạo đối tượng VNPayResponse thông qua Builder
-        PaymentDTO.VNPayResponse response = PaymentDTO.VNPayResponse.builder()
-                .code("00")
-                .message("Success")
-                .paymentUrl("http://yourdomain.com/payment/success")
-                .build();
-
-        if (status.equals("00")) {
-            return new ApiResponse<>(HttpStatus.OK.value(), "Success", response);
+        String html;
+        if ("00".equals(status)) {
+            html = """
+            <html>
+                <head><title>Thanh toán thành công</title></head>
+                <body style="font-family: Arial; text-align: center; padding-top: 50px;">
+                    <h2>🎉 Thanh toán thành công!</h2>
+                    <p>Click vào nút bên dưới để đóng cửa sổ này.</p>
+                    <button onclick="window.close()"
+                       style="padding:10px 20px;background-color:#4CAF50;color:white;
+                       border:none;border-radius:5px;cursor:pointer;margin-top:20px;">
+                       Đóng trang
+                    </button>
+                </body>
+            </html>
+        """;
         } else {
-            return new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), "Failed", null);
+            html = """
+            <html>
+                <head><title>Thanh toán thất bại</title></head>
+                <body style="font-family: Arial; text-align: center; padding-top: 50px;">
+                    <h2>❌ Thanh toán thất bại!</h2>
+                    <p>Click vào nút bên dưới để đóng cửa sổ này.</p>
+                    <button onclick="window.close()"
+                       style="padding:10px 20px;background-color:#f44336;color:white;
+                       border:none;border-radius:5px;cursor:pointer;margin-top:20px;">
+                       Đóng trang
+                    </button>
+                </body>
+            </html>
+        """;
         }
+
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/html; charset=UTF-8")
+                .body(html);
     }
-
-
 }
